@@ -1,0 +1,62 @@
+[
+  {
+    "title": "as_pkgsite",
+    "url": "reference/as_pkgsite.html",
+    "content": "as_pkgsite Generate minimal pkgsite data structure as_pkgsite(pkg = \".\") pkgPath to package. Generate minimal pkgsite data structure",
+    "type": "function"
+  },
+  {
+    "title": "build_home",
+    "url": "reference/build_home.html",
+    "content": "build_home Build home section build_home(pkg = \".\", quiet = FALSE, preview = FALSE) build_home_index(pkg = \".\", quiet = FALSE) pkgPath to package quiet Whether to suppress messages preview Whether to preview after building build_home() generates the home page from README.md or index.md",
+    "type": "function"
+  },
+  {
+    "title": "build_reference",
+    "url": "reference/build_reference.html",
+    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) build_reference_index(pkg = \".\") pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building build_reference() generates reference documentation from Rd files",
+    "type": "function"
+  },
+  {
+    "title": "build_search_index",
+    "url": "reference/build_search_index.html",
+    "content": "build_search_index Build search index build_search_index(pkg = \".\") pkgPath to package Creates a search index of all content for client-side searching",
+    "type": "function"
+  },
+  {
+    "title": "build_site",
+    "url": "reference/build_site.html",
+    "content": "build_site Build a minimal pkgdown website build_site(pkg = \".\", lazy = FALSE, preview = FALSE, quiet = TRUE) pkgPath to package lazy If TRUE, will only rebuild if source is newer than destination preview Whether to preview the site after building quiet Whether to suppress build messages build_site() creates a simple static documentation site with: [=init_site]init_site() [=build_home]build_home() [=build_reference]build_reference() [=build_vignettes]build_vignettes() The site uses a minimal template with a simple sidebar navigation. build_site()",
+    "type": "function"
+  },
+  {
+    "title": "build_vignettes",
+    "url": "reference/build_vignettes.html",
+    "content": "build_vignettes Build vignettes section build_vignettes(pkg = \".\", lazy = FALSE, quiet = FALSE, preview = FALSE) build_vignettes_index(pkg = \".\") pkgPath to package lazy Whether to skip files that haven't changed quiet Whether to suppress messages preview Whether to preview after building build_vignettes() renders R Markdown files from vignettes/ to vignettes/",
+    "type": "function"
+  },
+  {
+    "title": "init_site",
+    "url": "reference/init_site.html",
+    "content": "init_site Initialise minimal site infrastructure init_site(pkg = \".\") pkgPath to package init_site() creates the output directory and copies basic CSS files.",
+    "type": "function"
+  },
+  {
+    "title": "render_page",
+    "url": "reference/render_page.html",
+    "content": "render_page Render page with minimal template render_page(pkg = \".\", name, data, path, quiet = FALSE) data_template(pkg = \".\", root_path = \"\") pkgPath to package to document. name Name of the template (e.g. \"home\", \"reference-topic\") data Data for the template. path Location to create file; relative to destination directory. quiet If quiet, will suppress output messages root_path Relative path to site root (automatically calculated) Each page uses simple templates: \"head\", \"header\", \"content\", and \"footer\".",
+    "type": "function"
+  },
+  {
+    "title": "Editing the CSS template",
+    "url": "vignettes/css.html",
+    "content": "knitr::opts_chunk$set( collapse = TRUE, comment = \"#>\" ) Being this a package to build a minimal site, the CSS is very simple and it consists in two files: content.css and menu.css You can alter the CSS generated after running build_site(). If you open ./docs/content.cssyou can apply any valid CSS, for example by changing this ``css body { margin: 8px; padding: 0px; font-size: small; font-family: \"Lucida Grande\", \"Lucida Sans Unicode\", Arial, Verdana, Helvetica, sans-serif; background-color: #fff; color: #222; line-height: 1.5; } into this ``css body { margin: 8px; padding: 0px; font-size: small; font-family: \"Comic Sans MS\", Arial, Verdana, Helvetica, sans-serif; background-color: #fff; color: #222; line-height: 1.5; } The change will be reflected in the site after refreshing the browser. Before <img src=\"figures/before_font_change.png\" alt=\"before changing the font family\" width=\"50%\"/> After <img src=\"figures/after_font_change.png\" alt=\"after changing the font family\" width=\"50%\"/>",
+    "type": "vignette"
+  },
+  {
+    "title": "Inserting images",
+    "url": "vignettes/images.html",
+    "content": "knitr::opts_chunk$set( collapse = TRUE, comment = \"#>\", fig.path = \"figures/\" ) Among the different image formats, it is possible to render images in a vignette as PNG or SVG. Here is an example of a rendered plot as PNG: <pre><code>``{r plot1, echo = FALSE, message = FALSE, dev = \"png\", fig.ext = \"png\", eval = capabilities(\"cairo\")} library(ggplot2) g <- ggplot(data = mtcars, aes(x = wt, y = mpg)) + geom_point() + geom_smooth(method = \"lm\", se = FALSE) + labs( title = \"Scatter plot with regression line for MPG = A + B x WT\", subtitle = \"Source: own creation using the mtcars dataset\", x = \"Car Weight\", y = \"Miles per Gallon\" ) + theme_minimal(base_size = 13) g `<\/code><\/pre> library(ggplot2) g <- ggplot(data = mtcars, aes(x = wt, y = mpg)) + geom_point() + geom_smooth(method = \"lm\", se = FALSE) + labs( title = \"Scatter plot with regression line for MPG = A + B x WT\", subtitle = \"Source: own creation using the mtcars dataset\", x = \"Car Weight\", y = \"Miles per Gallon\" ) + theme_minimal(base_size = 13) g The same plot rendered in SVG format: <pre><code>`{r plot2, echo = FALSE, message = FALSE, dev = \"svg\", fig.ext = \"svg\", eval = capabilities(\"cairo\")} g ``<\/code><\/pre> g",
+    "type": "vignette"
+  }
+]

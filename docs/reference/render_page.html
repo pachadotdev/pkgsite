@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>render_page • pkgsite</title><link rel="stylesheet" href="../menu.css"><link rel="stylesheet" href="../content.css"></head><body>
+<div class="main-container">
+<div id="menu">
+  <div>
+    <h1>pkgsite Documentation</h1>
+  </div>
+
+  <div class="search-container">
+    <input type="text" id="search-box" placeholder="Search..."></div>
+
+  <div class="submenu">
+    <label style="border-bottom: 0;"><a href="../index.html">Home 🏠</a></label>
+  </div>
+
+  <div class="submenu">
+    <label>Functions</label>
+    <a href="../reference/as_pkgsite.html">as_pkgsite</a>
+    <a href="../reference/build_home.html">build_home</a>
+    <a href="../reference/build_reference.html">build_reference</a>
+    <a href="../reference/build_search_index.html">build_search_index</a>
+    <a href="../reference/build_site.html">build_site</a>
+    <a href="../reference/build_vignettes.html">build_vignettes</a>
+    <a href="../reference/init_site.html">init_site</a>
+    <a href="../reference/render_page.html">render_page</a>
+  </div>
+
+  <div class="submenu">
+    <label>Vignettes</label>
+    <a href="../vignettes/css.html">Editing the CSS template</a>
+    <a href="../vignettes/images.html">Inserting images</a>
+  </div>
+
+</div>
+<div id="content">
+<h1>Render page with minimal template</h1>
+<h2>Usage</h2><pre class="ref-usage">
+render_page(pkg = ".", name, data, path, quiet = FALSE)
+data_template(pkg = ".", root_path = "")
+</pre>
+<h2>Arguments</h2><table class="ref-arguments"><tr><td><strong>pkg</strong></td><td>Path to package to document.</td></tr><tr><td><strong>name</strong></td><td>Name of the template (e.g. "home", "reference-topic")</td></tr><tr><td><strong>data</strong></td><td>Data for the template.</td></tr><tr><td><strong>path</strong></td><td>Location to create file; relative to destination directory.</td></tr><tr><td><strong>quiet</strong></td><td>If <code>quiet</code>, will suppress output messages</td></tr><tr><td><strong>root_path</strong></td><td>Relative path to site root (automatically calculated)</td></tr></table><h2>Description</h2><p>Each page uses simple templates: "head", "header", "content", and "footer".</p>
+<footer><p>Last updated: 2025-10-11 17:27:59</p>
+</footer><script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchBox = document.getElementById('search-box');
+  if (!searchBox) return;
+
+  let searchIndex = [];
+
+  // Load search index
+  fetch('../search.json')
+    .then(response => response.json())
+    .then(data => {
+      searchIndex = data;
+    })
+    .catch(error => {
+      console.log('Search index not available, falling back to simple search');
+    });
+
+  searchBox.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+
+    if (searchTerm === '') {
+      // Show all items when search is empty
+      document.querySelectorAll('#menu .submenu a').forEach(function(link) {
+        link.style.display = 'block';
+      });
+      document.querySelectorAll('#menu .submenu').forEach(function(submenu) {
+        submenu.style.display = 'block';
+      });
+      return;
+    }
+
+    // Content-based search using search index
+    if (searchIndex.length > 0) {
+      const matchingUrls = new Set();
+
+      searchIndex.forEach(function(item) {
+        const searchContent = (item.title + ' ' + item.content).toLowerCase();
+        if (searchContent.includes(searchTerm)) {
+          matchingUrls.add(item.url);
+        }
+      });
+
+      // Show/hide links based on content matches
+      document.querySelectorAll('#menu .submenu a').forEach(function(link) {
+        const href = link.getAttribute('href');
+        const relativePath = href.replace(/^.*\//, ''); // Get just the filename part
+
+        let isMatch = false;
+        matchingUrls.forEach(function(url) {
+          if (url.includes(relativePath)) {
+            isMatch = true;
+          }
+        });
+
+        // Also check link text for simple matches
+        if (!isMatch && link.textContent.toLowerCase().includes(searchTerm)) {
+          isMatch = true;
+        }
+
+        link.style.display = isMatch ? 'block' : 'none';
+      });
+    } else {
+      // Fallback to simple name-based search
+      document.querySelectorAll('#menu .submenu a').forEach(function(link) {
+        const linkText = link.textContent.toLowerCase();
+        link.style.display = linkText.includes(searchTerm) ? 'block' : 'none';
+      });
+    }
+
+    // Show/hide entire submenus if no visible links
+    document.querySelectorAll('#menu .submenu').forEach(function(submenu) {
+      const visibleLinks = submenu.querySelectorAll('a[style*="display: block"]');
+      const label = submenu.querySelector('label');
+
+      // Don't hide the Home submenu
+      if (label && label.textContent.includes('Home')) {
+        return;
+      }
+
+      submenu.style.display = visibleLinks.length > 0 ? 'block' : 'none';
+    });
+  });
+});
+</script></div>
+</div>
+</body></html>
+

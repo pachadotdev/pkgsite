@@ -1,0 +1,24 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# pkgsite
+
+<!-- badges: start -->
+
+[![Lifecycle:
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/pacha)
+<!-- badges: end -->
+
+The goal of pkgsite is to build a minimal website for an R package, with
+a navigation menu and a content area. It is inspired by the
+[pkgdown](https://pkgdown.r-lib.org/) package but it is much simpler and
+it does not have as many features.
+
+Like pkgdown, pkgsite provides a `build_site()` function that builds the
+site and saves it in the `docs/` folder of the package. The site can
+then be published using GitHub Pages or any other static site hosting
+service.
+
+This package does not provide bootstrap or any other CSS framework, it
+uses a simple CSS template that can be easily customized.

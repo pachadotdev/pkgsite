@@ -1,0 +1,5 @@
+^\.vscode$
+^docs$
+^LICENSE\.md$
+^README\.Rmd$
+^README\.html$

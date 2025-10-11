@@ -1,0 +1,64 @@
+---
+title: "Inserting images"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Inserting images}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "figures/"
+)
+```
+
+Among the different image formats, it is possible to render images in a vignette as PNG or SVG.
+
+Here is an example of a rendered plot as PNG:
+
+<pre><code>```{r plot1, echo = FALSE, message = FALSE, dev = "png", fig.ext = "png", eval = capabilities("cairo")}
+library(ggplot2)
+
+g <- ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Scatter plot with regression line for MPG = A + B x WT",
+    subtitle = "Source: own creation using the mtcars dataset",
+    x = "Car Weight",
+    y = "Miles per Gallon"
+  ) +
+  theme_minimal(base_size = 13)
+
+g
+```</code></pre>
+
+```{r plot1, echo = FALSE, message = FALSE, dev = "png", fig.ext = "png", eval = capabilities("cairo")}
+library(ggplot2)
+
+g <- ggplot(data = mtcars, aes(x = wt, y = mpg)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Scatter plot with regression line for MPG = A + B x WT",
+    subtitle = "Source: own creation using the mtcars dataset",
+    x = "Car Weight",
+    y = "Miles per Gallon"
+  ) +
+  theme_minimal(base_size = 13)
+
+g
+```
+
+The same plot rendered in SVG format:
+
+<pre><code>```{r plot2, echo = FALSE, message = FALSE, dev = "svg", fig.ext = "svg", eval = capabilities("cairo")}
+g
+```</code></pre>
+
+```{r plot2, echo = FALSE, message = FALSE, dev = "svg", fig.ext = "svg", eval = capabilities("cairo")}
+g
+```

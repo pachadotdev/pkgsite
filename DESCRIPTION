@@ -1,0 +1,28 @@
+Package: pkgsite
+Title: Minimal Static HTML Documentation for R Packages
+Version: 0.1.0
+Authors@R: person("Mauricio", "Vargas Sepulveda", , "m.vargas.sepulveda@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-1017-7574"))
+Description: Generate minimal static HTML documentation websites from R packages. 
+    Creates simple sites with basic navigation, function reference, and articles 
+    using lightweight templates without complex theming or Bootstrap dependencies.
+License: Apache License (>= 2)
+Depends:
+    R (>= 4.1)
+Imports:
+    cli (>= 3.6.1),
+    desc (>= 1.4.0),
+    fs (>= 1.4.0),
+    jsonlite,
+    purrr (>= 1.0.0),
+    whisker,
+    xml2 (>= 1.3.1),
+    yaml
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Suggests: 
+    ggplot2,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
