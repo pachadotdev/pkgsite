@@ -97,7 +97,8 @@ build_article <- function(pkg, name, lazy = FALSE, quiet = FALSE) {
     html_content <- simple_md_to_html(src_path)
   }
 
-  article_title <- tools::file_path_sans_ext(name)
+  # Extract proper vignette title from VignetteIndexEntry
+  article_title <- get_vignette_title(pkg, name)
 
   data <- list(
     pagetitle = article_title,
