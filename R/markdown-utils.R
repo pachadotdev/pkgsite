@@ -357,7 +357,7 @@ convert_rd_to_html <- function(text) {
     text <- gsub("\\\\code\\{([^}]+)\\}", "<code>\\1</code>", text, perl = TRUE)
 
     # Convert \dontrun{} by keeping content
-    text <- gsub("\\\\dontrun\\{([^}]*)\\}", "\\1", text, perl = TRUE)
+    text <- gsub("\\\\dontrun\\{([\\s\\S]*?)\\}", "\\1", text, perl = TRUE)
 
     # Convert \link{} to HTML links (simple version)
     text <- gsub(

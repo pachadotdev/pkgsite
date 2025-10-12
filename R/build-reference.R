@@ -254,11 +254,13 @@ roxygen_to_html <- function(topic_info) {
   if (nchar(examples) > 0) {
     # Process examples - remove \dontrun{} wrapper if present
     examples_clean <- gsub(
-      "\\\\dontrun\\{([^}]*)\\}",
+      "\\\\dontrun\\{([\\s\\S]*?)\\}",
       "\\1",
       examples,
       perl = TRUE
     )
+    # Trim leading/trailing whitespace from extracted content
+    examples_clean <- gsub("^\\s+|\\s+$", "", examples_clean, perl = TRUE)
     html <- paste0(
       html,
       "<h2>Examples</h2>\n<pre><code>",
@@ -582,17 +584,18 @@ preserve_code_blocks_whitespace <- function(content) {
 
 clean_examples_content <- function(text) {
   # Remove \dontrun{} wrapper silently - just extract the content inside
-  text <- gsub("\\\\dontrun\\{([^}]*)\\}", "\\1", text, perl = TRUE)
+  # Use a multiline-aware regex and trim the extracted content
+  text <- gsub("\\\\dontrun\\{([\\s\\S]*?)\\}", "\\1", text, perl = TRUE)
+
+  # After extracting dontrun content, trim leading/trailing whitespace
+  text <- gsub("^\\s+|\\s+$", "", text, perl = TRUE)
 
   # Remove other Rd commands but keep the code structure
-  text <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", text, perl = TRUE)
+  text <- gsub("\\\\[a-zA-Z]+\\{([\\s\\S]*?)\\}", "\\1", text, perl = TRUE)
   text <- gsub("\\\\[a-zA-Z]+", "", text, perl = TRUE)
 
   # Clean up any remaining braces
   text <- gsub("\\{|\\}", "", text, perl = TRUE)
-
-  # Preserve ALL whitespace structure - only trim start and end
-  text <- gsub("^\\s+|\\s+$", "", text, perl = TRUE) # Trim start/end only
 
   return(text)
 }
@@ -712,7 +715,7 @@ clean_rd_content <- function(text) {
   }
 
   # Clean up any remaining unhandled Rd commands (but be more careful)
-  text <- gsub("\\\\dontrun\\{([^}]*)\\}", "\\1", text, perl = TRUE) # Remove \dontrun but keep content
+  text <- gsub("\\\\dontrun\\{([\\s\\S]*?)\\}", "\\1", text, perl = TRUE) # Remove \dontrun but keep content
   text <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", text, perl = TRUE) # Remove other commands
   text <- gsub("\\\\[a-zA-Z]+", "", text, perl = TRUE) # Remove command names without braces
 
