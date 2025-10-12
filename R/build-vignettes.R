@@ -17,7 +17,10 @@ build_vignettes <- function(
   pkg <- as_pkgsite(pkg)
 
   if (!quiet) {
-    cli::cli_rule("Building vignettes")
+    message(paste0(
+      "-- Building vignettes ",
+      paste(rep("-", 60), collapse = "")
+    ))
   }
 
   # Build individual articles
@@ -39,7 +42,7 @@ build_vignettes <- function(
 build_vignettes_index <- function(pkg = ".") {
   pkg <- as_pkgsite(pkg)
 
-  cli::cli_inform("Writing {.file vignettes/index.html}")
+  message("Writing vignettes/index.html")
 
   vignettes <- get_vignettes(pkg)
 
@@ -51,7 +54,7 @@ build_vignettes_index <- function(pkg = ".") {
       "<ul>",
       paste0(
         "<li><a href=\"",
-        fs::path_ext_set(vignettes, "html"),
+        paste0(tools::file_path_sans_ext(vignettes), ".html"),
         "\">",
         tools::file_path_sans_ext(vignettes),
         "</a></li>",
@@ -71,27 +74,27 @@ build_vignettes_index <- function(pkg = ".") {
 }
 
 build_article <- function(pkg, name, lazy = FALSE, quiet = FALSE) {
-  src_path <- fs::path(pkg$src_path, "vignettes", name)
-  dst_path <- as.character(fs::path(
+  src_path <- file.path(pkg$src_path, "vignettes", name)
+  dst_path <- file.path(
     "vignettes",
-    fs::path_ext_set(name, "html")
-  ))
+    paste0(tools::file_path_sans_ext(name), ".html")
+  )
 
-  if (lazy && file.exists(fs::path(pkg$dst_path, dst_path))) {
+  if (lazy && file.exists(file.path(pkg$dst_path, dst_path))) {
     if (
       file.info(src_path)$mtime <=
-        file.info(fs::path(pkg$dst_path, dst_path))$mtime
+        file.info(file.path(pkg$dst_path, dst_path))$mtime
     ) {
       return(invisible())
     }
   }
 
   if (!quiet) {
-    cli::cli_inform("Writing {.file {dst_path}}")
+    message("Writing ", dst_path)
   }
 
   # Simple Rmd to HTML conversion
-  if (fs::path_ext(src_path) %in% c("Rmd", "rmd")) {
+  if (tools::file_ext(src_path) %in% c("Rmd", "rmd")) {
     html_content <- simple_rmd_to_html(src_path)
   } else {
     html_content <- simple_md_to_html(src_path)
@@ -115,13 +118,17 @@ build_article <- function(pkg, name, lazy = FALSE, quiet = FALSE) {
 }
 
 get_vignettes <- function(pkg) {
-  vignette_dir <- fs::path(pkg$src_path, "vignettes")
-  if (!fs::dir_exists(vignette_dir)) {
+  vignette_dir <- file.path(pkg$src_path, "vignettes")
+  if (!dir.exists(vignette_dir)) {
     return(character(0))
   }
 
-  vignettes <- fs::dir_ls(vignette_dir, regexp = "\\.(Rmd|rmd|md)$")
-  vignettes <- fs::path_file(vignettes)
+  vignettes <- list.files(
+    vignette_dir,
+    pattern = "\\.(Rmd|rmd|md)$",
+    full.names = TRUE
+  )
+  vignettes <- basename(vignettes)
 
   # Filter out files starting with _ (child documents)
   vignettes <- vignettes[!grepl("^_", vignettes)]
@@ -194,8 +201,12 @@ simple_rmd_to_html <- function(path) {
     },
     error = function(e) {
       # If rmarkdown fails, fall back to simple markdown processing
-      cli::cli_warn(
-        "Failed to render R Markdown file {.file {path}}: {e$message}"
+      warning(
+        "Failed to render R Markdown file ",
+        path,
+        ": ",
+        e$message,
+        call. = FALSE
       )
       simple_md_to_html(path)
     }
@@ -228,41 +239,40 @@ copy_vignette_figures <- function(pkg, vignette_name, quiet = FALSE) {
 
   # Common figure directories where knitr might save figures
   possible_fig_dirs <- c(
-    fs::path(pkg$src_path, "vignettes", "figures"),
-    fs::path(
+    file.path(pkg$src_path, "vignettes", "figures"),
+    file.path(
       pkg$src_path,
       "vignettes",
       paste0(vignette_base, "_files", "figure-html")
     ),
-    fs::path(pkg$src_path, "vignettes", paste0(vignette_base, "_files")),
-    fs::path(pkg$src_path, "vignettes")
+    file.path(pkg$src_path, "vignettes", paste0(vignette_base, "_files")),
+    file.path(pkg$src_path, "vignettes")
   )
 
   # Create figures directory in docs/vignettes if it doesn't exist
-  docs_fig_dir <- fs::path(pkg$dst_path, "vignettes", "figures")
-  if (!fs::dir_exists(docs_fig_dir)) {
-    fs::dir_create(docs_fig_dir, recurse = TRUE)
+  docs_fig_dir <- file.path(pkg$dst_path, "vignettes", "figures")
+  if (!dir.exists(docs_fig_dir)) {
+    dir.create(docs_fig_dir, recursive = TRUE)
   }
 
   # Look for and copy figure files
   for (fig_dir in possible_fig_dirs) {
-    if (fs::dir_exists(fig_dir)) {
+    if (dir.exists(fig_dir)) {
       # Find image files (png, svg, jpg, jpeg, gif)
-      image_files <- fs::dir_ls(
+      image_files <- list.files(
         fig_dir,
-        regexp = "\\.(png|svg|jpg|jpeg|gif)$",
-        recurse = FALSE
+        pattern = "\\.(png|svg|jpg|jpeg|gif)$",
+        recursive = FALSE,
+        full.names = TRUE
       )
 
       if (length(image_files) > 0) {
         for (img_file in image_files) {
-          dst_file <- fs::path(docs_fig_dir, fs::path_file(img_file))
-          fs::file_copy(img_file, dst_file, overwrite = TRUE)
+          dst_file <- file.path(docs_fig_dir, basename(img_file))
+          file.copy(img_file, dst_file, overwrite = TRUE)
 
           if (!quiet) {
-            cli::cli_inform(
-              "Copying figure {.file {fs::path_file(img_file)}}"
-            )
+            message("Copying figure ", basename(img_file))
           }
         }
       }

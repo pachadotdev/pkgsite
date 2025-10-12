@@ -24,9 +24,10 @@ render_page <- function(
 }
 
 #' @importFrom utils modifyList
+#' @importFrom xml2 read_html
 render_page_html <- function(pkg, name, data = list(), path = "") {
   # Calculate depth for relative paths
-  depth <- length(fs::path_split(path)[[1]]) - 1
+  depth <- length(strsplit(path, "/")[[1]]) - 1
   root_path <- if (depth > 0) paste(rep("../", depth), collapse = "") else ""
 
   data <- modifyList(data_template(pkg, root_path), data)
@@ -34,14 +35,15 @@ render_page_html <- function(pkg, name, data = list(), path = "") {
   # render template components using minimal templates
   pieces <- c("header", "content", "footer")
 
-  templates <- purrr::map_chr(
+  templates <- vapply(
     pieces,
     find_minimal_template,
+    character(1),
     page_type = name,
     pkg = pkg
   )
-  components <- purrr::map(templates, render_template, data = data)
-  components <- purrr::set_names(components, pieces)
+  components <- lapply(templates, render_template, data = data)
+  names(components) <- pieces
 
   # render complete layout
   template <- find_minimal_template("layout", page_type = name, pkg = pkg)
@@ -51,7 +53,7 @@ render_page_html <- function(pkg, name, data = list(), path = "") {
   # Strip trailing whitespace
   rendered <- gsub(" +\n", "\n", rendered, perl = TRUE)
 
-  xml2::read_html(rendered, encoding = "UTF-8")
+  read_html(rendered, encoding = "UTF-8")
 }
 
 #' @param root_path Relative path to site root (automatically calculated)
@@ -75,7 +77,7 @@ data_template <- function(pkg = ".", root_path = "") {
     ),
     has_reference = length(topics) > 0,
     reference_topics = if (length(topics) > 0) {
-      purrr::map(topics, function(topic) {
+      lapply(topics, function(topic) {
         list(
           filename = paste0(topic, ".html"),
           title = topic
@@ -86,9 +88,9 @@ data_template <- function(pkg = ".", root_path = "") {
     },
     has_vignettes = length(vignettes) > 0,
     vignettes = if (length(vignettes) > 0) {
-      purrr::map(vignettes, function(v) {
+      lapply(vignettes, function(v) {
         list(
-          filename = fs::path_ext_set(v, "html"),
+          filename = paste0(tools::file_path_sans_ext(v), ".html"),
           title = get_vignette_title(pkg, v)
         )
       })
@@ -118,9 +120,12 @@ find_minimal_template <- function(name, page_type, pkg) {
   }
 
   # If no template found, return an error
-  cli::cli_abort(
-    "Template {.file {template_file}} not found in {.path inst/include/site/html/}. 
-     Make sure the package is properly installed with {.code devtools::load_all()}."
+  stop(
+    "Template ",
+    template_file,
+    " not found in inst/include/site/html/. ",
+    "Make sure the package is properly installed with devtools::load_all().",
+    call. = FALSE
   )
 }
 
@@ -151,23 +156,27 @@ data_site <- function(pkg, root_path = "") {
 }
 
 get_reference_topics <- function(pkg) {
-  man_dir <- fs::path(pkg$src_path, "man")
-  if (!fs::dir_exists(man_dir)) {
+  man_dir <- file.path(pkg$src_path, "man")
+  if (!dir.exists(man_dir)) {
     return(character(0))
   }
-  man_files <- fs::dir_ls(man_dir, glob = "*.Rd")
-  topics <- fs::path_ext_remove(fs::path_file(man_files))
+  man_files <- list.files(man_dir, pattern = "\\.Rd$", full.names = TRUE)
+  topics <- tools::file_path_sans_ext(basename(man_files))
   return(topics)
 }
 
 get_vignettes <- function(pkg) {
-  vignette_dir <- fs::path(pkg$src_path, "vignettes")
-  if (!fs::dir_exists(vignette_dir)) {
+  vignette_dir <- file.path(pkg$src_path, "vignettes")
+  if (!dir.exists(vignette_dir)) {
     return(character(0))
   }
 
-  vignettes <- fs::dir_ls(vignette_dir, regexp = "\\.(Rmd|rmd|md)$")
-  vignettes <- fs::path_file(vignettes)
+  vignettes <- list.files(
+    vignette_dir,
+    pattern = "\\.(Rmd|rmd|md)$",
+    full.names = TRUE
+  )
+  vignettes <- basename(vignettes)
 
   # Filter out files starting with _ (child documents)
   vignettes <- vignettes[!grepl("^_", vignettes)]
@@ -176,7 +185,7 @@ get_vignettes <- function(pkg) {
 }
 
 get_vignette_title <- function(pkg, vignette_file) {
-  vignette_path <- fs::path(pkg$src_path, "vignettes", vignette_file)
+  vignette_path <- file.path(pkg$src_path, "vignettes", vignette_file)
 
   if (!file.exists(vignette_path)) {
     return(tools::file_path_sans_ext(vignette_file))
@@ -243,12 +252,12 @@ get_vignette_title <- function(pkg, vignette_file) {
 }
 
 write_if_different <- function(pkg, contents, path, quiet = FALSE) {
-  full_path <- fs::path(pkg$dst_path, path)
+  full_path <- file.path(pkg$dst_path, path)
 
   if (!quiet) {
-    cli::cli_inform("Writing {.file {path}}")
+    message("Writing ", path)
   }
 
-  fs::dir_create(fs::path_dir(full_path))
+  dir.create(dirname(full_path), recursive = TRUE, showWarnings = FALSE)
   writeLines(contents, full_path)
 }

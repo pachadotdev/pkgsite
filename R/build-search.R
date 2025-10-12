@@ -11,7 +11,7 @@
 build_search_index <- function(pkg = ".") {
     pkg <- as_pkgsite(pkg)
 
-    cli::cli_inform("Building search index")
+    message("Building search index")
 
     # Initialize search index
     search_data <- list()
@@ -21,7 +21,7 @@ build_search_index <- function(pkg = ".") {
     if (length(topics) > 0) {
         for (topic in topics) {
             # Read the .Rd file
-            rd_path <- fs::path(pkg$src_path, "man", paste0(topic, ".Rd"))
+            rd_path <- file.path(pkg$src_path, "man", paste0(topic, ".Rd"))
             if (file.exists(rd_path)) {
                 rd_content <- readLines(rd_path, warn = FALSE)
 
@@ -39,9 +39,13 @@ build_search_index <- function(pkg = ".") {
     }
 
     # Index vignettes
-    vignette_dir <- fs::path(pkg$src_path, "vignettes")
-    if (fs::dir_exists(vignette_dir)) {
-        vignette_files <- fs::dir_ls(vignette_dir, glob = "*.Rmd")
+    vignette_dir <- file.path(pkg$src_path, "vignettes")
+    if (dir.exists(vignette_dir)) {
+        vignette_files <- list.files(
+            vignette_dir,
+            pattern = "\\.Rmd$",
+            full.names = TRUE
+        )
 
         for (vignette_file in vignette_files) {
             content <- readLines(vignette_file, warn = FALSE)
@@ -54,13 +58,13 @@ build_search_index <- function(pkg = ".") {
                     title_line[1]
                 )
             } else {
-                title <- fs::path_ext_remove(fs::path_file(vignette_file))
+                title <- tools::file_path_sans_ext(basename(vignette_file))
             }
 
             # Extract text content (remove R chunks and YAML)
             text_content <- extract_vignette_text(content)
 
-            filename <- fs::path_ext_remove(fs::path_file(vignette_file))
+            filename <- tools::file_path_sans_ext(basename(vignette_file))
 
             search_data[[length(search_data) + 1]] <- list(
                 title = title,
@@ -77,7 +81,7 @@ build_search_index <- function(pkg = ".") {
         auto_unbox = TRUE,
         pretty = TRUE
     )
-    writeLines(search_json, fs::path(pkg$dst_path, "search.json"))
+    writeLines(search_json, file.path(pkg$dst_path, "search.json"))
 
     invisible(pkg)
 }

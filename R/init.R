@@ -8,8 +8,11 @@
 init_site <- function(pkg = ".") {
   pkg <- as_pkgsite(pkg)
 
-  cli::cli_rule("Initialising minimal site")
-  fs::dir_create(pkg$dst_path)
+  message(paste0(
+    "-- Initialising minimal site ",
+    paste(rep("-", 54), collapse = "")
+  ))
+  dir.create(pkg$dst_path, recursive = TRUE, showWarnings = FALSE)
 
   # Copy minimal assets
   copy_minimal_assets(pkg)
@@ -22,12 +25,16 @@ copy_minimal_assets <- function(pkg = ".") {
 
   # Copy minimal CSS files from inst/include/site/css
   css_assets_path <- system.file("include/site/css", package = "pkgsite")
-  if (fs::dir_exists(css_assets_path)) {
-    css_files <- fs::dir_ls(css_assets_path, glob = "*.css")
+  if (dir.exists(css_assets_path)) {
+    css_files <- list.files(
+      css_assets_path,
+      pattern = "\\.css$",
+      full.names = TRUE
+    )
     for (css_file in css_files) {
-      fs::file_copy(
+      file.copy(
         css_file,
-        fs::path(pkg$dst_path, fs::path_file(css_file)),
+        file.path(pkg$dst_path, basename(css_file)),
         overwrite = TRUE
       )
     }

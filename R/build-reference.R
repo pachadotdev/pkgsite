@@ -14,7 +14,10 @@ build_reference <- function(
 ) {
   pkg <- as_pkgsite(pkg)
 
-  cli::cli_rule("Building function reference")
+  message(paste0(
+    "-- Building function reference ",
+    paste(rep("-", 50), collapse = "")
+  ))
 
   # Build reference index
   build_reference_index(pkg)
@@ -38,7 +41,7 @@ build_reference <- function(
 build_reference_index <- function(pkg = ".") {
   pkg <- as_pkgsite(pkg)
 
-  cli::cli_inform("Writing {.file reference/index.html}")
+  message("Writing reference/index.html")
 
   topics <- get_reference_topics(pkg)
 
@@ -66,19 +69,19 @@ build_reference_index <- function(pkg = ".") {
 }
 
 build_reference_topic <- function(pkg, topic, lazy = FALSE) {
-  src_path <- fs::path(pkg$src_path, "man", paste0(topic, ".Rd"))
-  dst_path <- as.character(fs::path("reference", paste0(topic, ".html")))
+  src_path <- file.path(pkg$src_path, "man", paste0(topic, ".Rd"))
+  dst_path <- file.path("reference", paste0(topic, ".html"))
 
-  if (lazy && file.exists(fs::path(pkg$dst_path, dst_path))) {
+  if (lazy && file.exists(file.path(pkg$dst_path, dst_path))) {
     if (
       file.info(src_path)$mtime <=
-        file.info(fs::path(pkg$dst_path, dst_path))$mtime
+        file.info(file.path(pkg$dst_path, dst_path))$mtime
     ) {
       return(invisible())
     }
   }
 
-  cli::cli_inform("Writing {.file {dst_path}}")
+  message("Writing ", dst_path)
 
   # Simple Rd to HTML conversion
   rd_content <- readLines(src_path, warn = FALSE)
@@ -94,8 +97,12 @@ build_reference_topic <- function(pkg, topic, lazy = FALSE) {
 }
 
 get_reference_topics <- function(pkg) {
-  man_files <- fs::dir_ls(fs::path(pkg$src_path, "man"), glob = "*.Rd")
-  topics <- fs::path_ext_remove(fs::path_file(man_files))
+  man_files <- list.files(
+    file.path(pkg$src_path, "man"),
+    pattern = "\\.Rd$",
+    full.names = TRUE
+  )
+  topics <- tools::file_path_sans_ext(basename(man_files))
   return(topics)
 }
 

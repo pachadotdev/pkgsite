@@ -15,7 +15,7 @@ build_home <- function(
   pkg <- as_pkgsite(pkg)
 
   if (!quiet) {
-    cli::cli_rule("Building home")
+    message(paste0("-- Building home ", paste(rep("-", 64), collapse = "")))
   }
 
   # Build index page
@@ -38,11 +38,11 @@ build_home_index <- function(pkg = ".", quiet = FALSE) {
 
   if (!quiet) {
     if (!is.null(home_source)) {
-      cli::cli_inform("Reading {.file {home_source}}")
+      message("Reading ", home_source)
     } else {
-      cli::cli_inform("No README found, creating basic home page")
+      message("No README found, creating basic home page")
     }
-    cli::cli_inform("Writing {.file index.html}")
+    message("Writing index.html")
   }
 
   # Read and convert markdown content
@@ -70,9 +70,9 @@ build_home_index <- function(pkg = ".", quiet = FALSE) {
 
 find_home_source <- function(pkg) {
   candidates <- c(
-    fs::path(pkg$src_path, "pkgdown", "index.md"),
-    fs::path(pkg$src_path, "index.md"),
-    fs::path(pkg$src_path, "README.md")
+    file.path(pkg$src_path, "pkgdown", "index.md"),
+    file.path(pkg$src_path, "index.md"),
+    file.path(pkg$src_path, "README.md")
   )
 
   for (candidate in candidates) {
@@ -145,22 +145,22 @@ copy_readme_images <- function(pkg, readme_path) {
 
   # Copy each image to docs folder
   for (image_path in image_paths) {
-    src_path <- fs::path(pkg$src_path, image_path)
+    src_path <- file.path(pkg$src_path, image_path)
 
     if (file.exists(src_path)) {
       # Create destination directory structure
-      dest_path <- fs::path(pkg$dst_path, image_path)
-      dest_dir <- fs::path_dir(dest_path)
+      dest_path <- file.path(pkg$dst_path, image_path)
+      dest_dir <- dirname(dest_path)
 
-      if (!fs::dir_exists(dest_dir)) {
-        fs::dir_create(dest_dir, recurse = TRUE)
+      if (!dir.exists(dest_dir)) {
+        dir.create(dest_dir, recursive = TRUE)
       }
 
       # Copy the image
-      fs::file_copy(src_path, dest_path, overwrite = TRUE)
-      cli::cli_inform("Copying {.file {image_path}}")
+      file.copy(src_path, dest_path, overwrite = TRUE)
+      message("Copying ", image_path)
     } else {
-      cli::cli_warn("Image not found: {.file {src_path}}")
+      warning("Image not found: ", src_path, call. = FALSE)
     }
   }
 

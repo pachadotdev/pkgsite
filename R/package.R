@@ -6,16 +6,23 @@ as_pkgsite <- function(pkg = ".") {
     return(pkg)
   }
 
-  if (!fs::dir_exists(pkg)) {
-    cli::cli_abort("{.file {pkg}} is not an existing directory")
+  if (!dir.exists(pkg)) {
+    stop(pkg, " is not an existing directory", call. = FALSE)
   }
 
   src_path <- pkg
-  desc <- desc::desc(src_path)
+
+  # Read DESCRIPTION file using base R
+  desc_path <- file.path(src_path, "DESCRIPTION")
+  if (!file.exists(desc_path)) {
+    stop("DESCRIPTION file not found in ", src_path, call. = FALSE)
+  }
+
+  desc_fields <- read.dcf(desc_path)[1, ]
 
   # Read basic meta config
-  meta_path <- fs::path(src_path, "_pkgdown.yml")
-  if (fs::file_exists(meta_path)) {
+  meta_path <- file.path(src_path, "_pkgdown.yml")
+  if (file.exists(meta_path)) {
     meta <- yaml::read_yaml(meta_path)
   } else {
     meta <- list()
@@ -23,10 +30,10 @@ as_pkgsite <- function(pkg = ".") {
 
   # Create minimal pkgsite object
   pkg <- list(
-    package = desc$get_field("Package"),
-    version = desc$get_field("Version"),
+    package = desc_fields[["Package"]],
+    version = desc_fields[["Version"]],
     src_path = src_path,
-    dst_path = fs::path(src_path, meta$destination %||% "docs"),
+    dst_path = file.path(src_path, meta$destination %||% "docs"),
     meta = meta
   )
 
@@ -43,9 +50,9 @@ preview_site <- function(pkg, path = NULL) {
     path <- "index.html"
   }
 
-  site_path <- fs::path(pkg$dst_path, path)
-  if (fs::file_exists(site_path)) {
-    cli::cli_inform("Preview site at {.file {site_path}}")
+  site_path <- file.path(pkg$dst_path, path)
+  if (file.exists(site_path)) {
+    message("Preview site at ", site_path)
   }
   invisible()
 }

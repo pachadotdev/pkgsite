@@ -27,11 +27,14 @@ build_site <- function(
 ) {
   pkg <- as_pkgsite(pkg)
 
-  cli::cli_rule(
-    "Building minimal site for package {.pkg {pkg$package}}"
-  )
-  cli::cli_inform("Reading from: {.path {pkg$src_path}}")
-  cli::cli_inform("Writing to:   {.path {pkg$dst_path}}")
+  message(paste0(
+    "-- Building minimal site for package ",
+    pkg$package,
+    " ",
+    paste(rep("-", max(0, 80 - nchar(pkg$package) - 38)), collapse = "")
+  ))
+  message("Reading from: ", pkg$src_path)
+  message("Writing to:   ", pkg$dst_path)
 
   if (!lazy) {
     init_site(pkg)
@@ -48,9 +51,12 @@ build_site <- function(
 
   build_search_index(pkg)
 
-  cli::cli_rule(
-    "Finished building minimal site for package {.pkg {pkg$package}}"
-  )
+  message(paste0(
+    "-- Finished building minimal site for package ",
+    pkg$package,
+    " ",
+    paste(rep("-", max(0, 80 - nchar(pkg$package) - 46)), collapse = "")
+  ))
 
   if (preview) {
     preview_site(pkg)
