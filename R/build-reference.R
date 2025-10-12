@@ -252,21 +252,29 @@ roxygen_to_html <- function(topic_info) {
   }
 
   if (nchar(examples) > 0) {
-    # Process examples - remove \dontrun{} wrapper if present
-    examples_clean <- gsub(
-      "\\\\dontrun\\{([\\s\\S]*?)\\}",
-      "\\1",
-      examples,
-      perl = TRUE
-    )
-    # Trim leading/trailing whitespace from extracted content
-    examples_clean <- gsub("^\\s+|\\s+$", "", examples_clean, perl = TRUE)
-    html <- paste0(
-      html,
-      "<h2>Examples</h2>\n<pre><code>",
-      examples_clean,
-      "</code></pre>\n"
-    )
+    # Check if examples contain \dontrun{}
+    has_dontrun <- grepl("\\\\dontrun\\{", examples, perl = TRUE)
+
+    if (has_dontrun) {
+      # Just show code without execution if dontrun is present
+      examples_clean <- gsub(
+        "\\\\dontrun\\{([\\s\\S]*?)\\}",
+        "\\1",
+        examples,
+        perl = TRUE
+      )
+      examples_clean <- gsub("^\\s+|\\s+$", "", examples_clean, perl = TRUE)
+      html <- paste0(
+        html,
+        "<h2>Examples</h2>\n<pre><code>",
+        examples_clean,
+        "</code></pre>\n"
+      )
+    } else {
+      # Execute examples and show both code and output
+      examples_html <- execute_and_format_examples(examples)
+      html <- paste0(html, "<h2>Examples</h2>\n", examples_html)
+    }
   }
 
   return(html)
@@ -580,6 +588,89 @@ preserve_code_blocks_whitespace <- function(content) {
   }
 
   return(content)
+}
+
+execute_and_format_examples <- function(examples) {
+  # Clean up the examples text first
+  examples_clean <- gsub("^\\s+|\\s+$", "", examples, perl = TRUE)
+
+  # Split into individual expressions
+  # This is a simple approach - split by empty lines or by complete statements
+  lines <- strsplit(examples_clean, "\n")[[1]]
+
+  # Group lines into expressions (simple heuristic)
+  expressions <- c()
+  current_expr <- c()
+
+  for (line in lines) {
+    line <- trimws(line)
+    if (line == "") {
+      if (length(current_expr) > 0) {
+        expressions <- c(expressions, paste(current_expr, collapse = "\n"))
+        current_expr <- c()
+      }
+    } else {
+      current_expr <- c(current_expr, line)
+    }
+  }
+
+  # Add the last expression if any
+  if (length(current_expr) > 0) {
+    expressions <- c(expressions, paste(current_expr, collapse = "\n"))
+  }
+
+  # Execute each expression and format the output
+  html_output <- c()
+
+  for (expr in expressions) {
+    if (nchar(trimws(expr)) == 0) {
+      next
+    }
+
+    # Show the code
+    html_output <- c(
+      html_output,
+      paste0('<div class="sourceCode"><pre><code>', expr, '</code></pre></div>')
+    )
+
+    # Try to execute and capture output
+    tryCatch(
+      {
+        # Capture both output and any printed results
+        output <- capture.output({
+          result <- eval(parse(text = expr))
+          if (!is.null(result) && !identical(result, invisible())) {
+            print(result)
+          }
+        })
+
+        if (length(output) > 0) {
+          output_text <- paste(output, collapse = "\n")
+          html_output <- c(
+            html_output,
+            paste0(
+              '<div class="output"><pre><code>## ',
+              gsub("\n", "\n## ", output_text),
+              '</code></pre></div>'
+            )
+          )
+        }
+      },
+      error = function(e) {
+        # If there's an error, show it
+        html_output <<- c(
+          html_output,
+          paste0(
+            '<div class="error"><pre><code>## Error: ',
+            e$message,
+            '</code></pre></div>'
+          )
+        )
+      }
+    )
+  }
+
+  return(paste(html_output, collapse = "\n"))
 }
 
 clean_examples_content <- function(text) {
