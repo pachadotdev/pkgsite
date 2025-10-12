@@ -55,7 +55,6 @@ render_page_html <- function(pkg, name, data = list(), path = "") {
   read_html(rendered, encoding = "UTF-8")
 }
 
-#' @param root_path Relative path to site root (automatically calculated)
 #' @rdname render_page
 get_existing_reference_topics <- function(pkg) {
   reference_dir <- file.path(pkg$dst_path, "reference")

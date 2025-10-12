@@ -590,6 +590,7 @@ preserve_code_blocks_whitespace <- function(content) {
   return(content)
 }
 
+#' @importFrom utils capture.output
 execute_and_format_examples <- function(examples) {
   # Clean up the examples text first
   examples_clean <- gsub("^\\s+|\\s+$", "", examples, perl = TRUE)

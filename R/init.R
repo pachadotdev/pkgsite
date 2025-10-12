@@ -53,5 +53,28 @@ copy_minimal_assets <- function(pkg = ".") {
     }
   }
 
+  # Copy JavaScript files from inst/include/site/js
+  js_assets_path <- system.file("include/site/js", package = "pkgsite")
+  if (dir.exists(js_assets_path)) {
+    # Create js directory in destination if it doesn't exist
+    js_dst_path <- file.path(pkg$dst_path, "js")
+    if (!dir.exists(js_dst_path)) {
+      dir.create(js_dst_path, recursive = TRUE)
+    }
+
+    js_files <- list.files(
+      js_assets_path,
+      pattern = "\\.js$",
+      full.names = TRUE
+    )
+    for (js_file in js_files) {
+      file.copy(
+        js_file,
+        file.path(js_dst_path, basename(js_file)),
+        overwrite = TRUE
+      )
+    }
+  }
+
   invisible()
 }

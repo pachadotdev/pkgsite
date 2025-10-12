@@ -19,8 +19,6 @@ get_existing_reference_topics(pkg)
 \item{path}{Location to create file; relative to destination directory.}
 
 \item{quiet}{If \code{quiet}, will suppress output messages}
-
-\item{root_path}{Relative path to site root (automatically calculated)}
 }
 \description{
 Each page uses simple templates: "head", "header", "content", and "footer".
