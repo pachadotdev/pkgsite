@@ -141,6 +141,13 @@ extract_roxygen_for_topic <- function(r_file, topic) {
     return(NULL)
   }
 
+  # Check if the function is exported (has @export tag)
+  has_export <- any(grepl("^#'\\s*@export", roxygen_lines))
+
+  if (!has_export) {
+    return(NULL) # Skip non-exported functions
+  }
+
   return(list(
     topic = topic,
     source_file = r_file,
@@ -317,13 +324,56 @@ markdown_to_html_simple <- function(text) {
 }
 
 get_reference_topics <- function(pkg) {
-  man_files <- list.files(
-    file.path(pkg$src_path, "man"),
-    pattern = "\\.Rd$",
+  # Find all exported functions in R source files
+  r_files <- list.files(
+    file.path(pkg$src_path, "R"),
+    pattern = "\\.R$",
     full.names = TRUE
   )
-  topics <- tools::file_path_sans_ext(basename(man_files))
-  return(topics)
+
+  topics <- c()
+
+  for (r_file in r_files) {
+    lines <- readLines(r_file, warn = FALSE)
+
+    # Find function definitions
+    func_lines <- which(grepl(
+      "^[a-zA-Z_][a-zA-Z0-9_]*\\s*<-\\s*function",
+      lines
+    ))
+
+    for (func_line in func_lines) {
+      # Extract function name
+      func_match <- regmatches(
+        lines[func_line],
+        regexpr("^[a-zA-Z_][a-zA-Z0-9_]*", lines[func_line])
+      )
+      if (length(func_match) == 0) {
+        next
+      }
+
+      func_name <- func_match[1]
+
+      # Look backwards for roxygen comments
+      roxygen_lines <- c()
+      for (i in (func_line - 1):1) {
+        if (grepl("^#'", lines[i])) {
+          roxygen_lines <- c(lines[i], roxygen_lines)
+        } else if (grepl("^\\s*$", lines[i])) {
+          next # Skip empty lines
+        } else {
+          break # Hit non-roxygen line
+        }
+      }
+
+      # Check if function is exported
+      if (any(grepl("^#'\\s*@export", roxygen_lines))) {
+        topics <- c(topics, func_name)
+      }
+    }
+  }
+
+  return(unique(topics))
 }
 
 simple_rd_to_html <- function(rd_lines, topic) {

@@ -59,11 +59,33 @@ render_page_html <- function(pkg, name, data = list(), path = "") {
 #' @param root_path Relative path to site root (automatically calculated)
 #' @export
 #' @rdname render_page
+get_existing_reference_topics <- function(pkg) {
+  reference_dir <- file.path(pkg$dst_path, "reference")
+
+  if (!dir.exists(reference_dir)) {
+    return(character(0))
+  }
+
+  # Get all HTML files in the reference directory (except index.html)
+  html_files <- list.files(
+    reference_dir,
+    pattern = "\\.html$",
+    full.names = FALSE
+  )
+
+  # Remove index.html and extract topic names
+  topics <- html_files[html_files != "index.html"]
+  topics <- tools::file_path_sans_ext(topics)
+
+  # Sort alphabetically for consistent menu ordering
+  sort(topics)
+}
+
 data_template <- function(pkg = ".", root_path = "") {
   pkg <- as_pkgsite(pkg)
 
-  # Get reference topics
-  topics <- get_reference_topics(pkg)
+  # Get reference topics from existing HTML files
+  topics <- get_existing_reference_topics(pkg)
 
   # Get articles
   vignettes <- get_vignettes(pkg)
