@@ -16,6 +16,21 @@ build_home_index(pkg = ".", quiet = FALSE)
 
 \item{preview}{Whether to preview after building}
 }
+\value{
+Invisible \code{TRUE} if the home page was built successfully
+}
 \description{
 \code{build_home()} generates the home page from README.md or index.md
+}
+\examples{
+\dontrun{
+build_home()
+
+# Hide build messages
+build_home(quiet = TRUE)
+
+# Preview the home page after building
+build_home(preview = TRUE)
+}
+
 }

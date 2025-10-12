@@ -18,6 +18,24 @@ build_vignettes_index(pkg = ".")
 
 \item{preview}{Whether to preview after building}
 }
+\value{
+Invisible \code{TRUE} if the vignettes were built successfully
+}
 \description{
 \code{build_vignettes()} renders R Markdown files from vignettes/ to vignettes/
+}
+\examples{
+\dontrun{
+build_vignettes()
+
+# Rebuild only if source is newer than destination
+build_vignettes(lazy = TRUE)
+
+# Hide build messages
+build_vignettes(quiet = TRUE)
+
+# Preview the vignettes index after building
+build_vignettes(preview = TRUE)
+}
+
 }

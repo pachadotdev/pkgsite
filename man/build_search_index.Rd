@@ -9,6 +9,15 @@ build_search_index(pkg = ".")
 \arguments{
 \item{pkg}{Path to package}
 }
+\value{
+Invisible \code{TRUE} if the search index was built successfully
+}
 \description{
 Creates a search index of all content for client-side searching
+}
+\examples{
+\dontrun{
+build_search_index()
+}
+
 }

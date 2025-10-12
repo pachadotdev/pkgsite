@@ -4,16 +4,10 @@
 \alias{markdown_to_html_full}
 \title{Full markdown to HTML conversion}
 \usage{
-markdown_to_html_full(
-  content,
-  use_complex_code_blocks = TRUE,
-  language_specific = FALSE
-)
+markdown_to_html_full(content, language_specific = FALSE)
 }
 \arguments{
 \item{content}{Character string containing markdown content}
-
-\item{use_complex_code_blocks}{Whether to use the complex code block method}
 
 \item{language_specific}{Whether to preserve language specifications in code blocks}
 }

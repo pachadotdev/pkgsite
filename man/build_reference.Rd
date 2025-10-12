@@ -16,6 +16,21 @@ build_reference_index(pkg = ".")
 
 \item{preview}{Whether to preview after building}
 }
+\value{
+Invisible \code{TRUE} if the reference was built successfully
+}
 \description{
-\code{build_reference()} generates reference documentation from Rd files
+\code{build_reference()} generates reference documentation from Roxygen comments
+}
+\examples{
+\dontrun{
+build_reference()
+
+# Only rebuild if source is newer than destination
+build_reference(lazy = TRUE)
+
+# Preview the site after building
+build_reference(preview = TRUE)
+}
+
 }

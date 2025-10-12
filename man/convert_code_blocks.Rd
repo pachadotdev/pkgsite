@@ -4,15 +4,13 @@
 \alias{convert_code_blocks}
 \title{Convert markdown code blocks to HTML}
 \usage{
-convert_code_blocks(content)
+convert_code_blocks(content, language_specific = FALSE)
 }
 \arguments{
 \item{content}{Character string containing markdown content}
-}
-\value{
-Character string with code blocks converted to HTML
+
+\item{language_specific}{Whether to preserve language specifications}
 }
 \description{
-This function handles both fenced code blocks with language specifications
-and ensures proper paragraph separation.
+Convert markdown code blocks to HTML
 }

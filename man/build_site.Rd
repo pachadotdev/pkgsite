@@ -17,6 +17,9 @@ build_site(pkg = ".", lazy = FALSE, preview = FALSE, quiet = TRUE, url = NULL)
 
 \item{url}{Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)}
 }
+\value{
+Invisible \code{TRUE} if the site was built successfully
+}
 \description{
 \code{build_site()} creates a simple static documentation site with:
 \itemize{
@@ -41,4 +44,5 @@ build_site(url = "https://yourdomain.com")
 # Only rebuild if source is newer than destination
 build_site(lazy = TRUE)
 }
+
 }

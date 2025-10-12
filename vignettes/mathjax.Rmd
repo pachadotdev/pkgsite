@@ -1,0 +1,60 @@
+---
+title: "Displaying Math with MathJax"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Displaying Math with MathJax}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+pkgsite uses [MathJax](https://www.mathjax.org/) to render mathematical notation in R Markdown vignettes. MathJax is a
+JavaScript display engine for mathematics that works in all modern browsers.
+
+We can use LaTeX syntax to include mathematical expressions in our R Markdown documents. There are three main ways to
+include math in your text:
+
+1. Inline math: The expressions `$E = mc^2$` (or `\(E = mc^2\)`) will render as \(E = mc^2\)
+2. Display math: The expressions `$$E = mc^2$$` (or `\[E = mc^2\]`) will render as
+   \[ E = mc^2 \]
+3. Math environments: You can use LaTeX math environments like `equation`, `align`, etc. For example, the code
+   ```latex
+    \begin{equation}
+      E = mc^2
+    \end{equation}
+   ```
+   will render as
+   \begin{equation}
+     E = mc^2
+   \end{equation}
+
+More complex expressions can be created using standard LaTeX math syntax. For example:
+
+```latex
+\begin{align*}
+% Normal distribution formula
+f(x | \mu, \sigma^2) &= \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2 \sigma^2}} \cr
+% Sample mean and variance
+\bar{x} &= \frac{1}{n} \sum_{i=1}^{n} x_i \cr
+s^2 &= \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
+\end{align*}
+```
+
+\begin{align*}
+% Normal distribution formula
+f(x | \mu, \sigma^2) &= \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x - \mu)^2}{2 \sigma^2}} \cr
+% Sample mean and variance
+\bar{x} &= \frac{1}{n} \sum_{i=1}^{n} x_i \cr
+s^2 &= \frac{1}{n-1} \sum_{i=1}^{n} (x_i - \bar{x})^2
+\end{align*}
+
+These more elegant expressions also work witn inline math mode, for example `$\{a_{ij}\}_{m \times n}\$` renders as
+\(\{a_{ij}\}_{m \times n}\).
+
+Other possibilities are `begin{equation*}` or any other described in the MathJax documentation.

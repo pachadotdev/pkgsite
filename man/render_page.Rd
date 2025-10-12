@@ -2,12 +2,12 @@
 % Please edit documentation in R/render.R
 \name{render_page}
 \alias{render_page}
-\alias{data_template}
+\alias{get_existing_reference_topics}
 \title{Render page with minimal template}
 \usage{
 render_page(pkg = ".", name, data, path, quiet = FALSE)
 
-data_template(pkg = ".", root_path = "")
+get_existing_reference_topics(pkg)
 }
 \arguments{
 \item{pkg}{Path to package to document.}

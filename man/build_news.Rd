@@ -13,6 +13,21 @@ build_news(pkg = ".", quiet = TRUE, preview = FALSE)
 
 \item{preview}{If \code{TRUE}, the news page will be opened in browser}
 }
+\value{
+Invisible \code{TRUE} if the news page was built successfully
+}
 \description{
-Generates a news page from NEWS.md, NEWS.Rmd, or ChangeLog files.
+Generates a news page from NEWS.md
+}
+\examples{
+\dontrun{
+build_news()
+
+# Hide build messages
+build_news(quiet = TRUE)
+
+# Preview the news page after building
+build_news(preview = TRUE)
+}
+
 }
