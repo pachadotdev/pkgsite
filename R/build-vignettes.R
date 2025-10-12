@@ -145,6 +145,19 @@ simple_rmd_to_html <- function(path) {
       temp_rmd <- file.path(temp_dir, basename(path))
       file.copy(path, temp_rmd)
 
+      # Copy all auxiliary files from the vignettes directory (including data files)
+      vignette_dir <- dirname(path)
+      aux_files <- list.files(
+        vignette_dir,
+        pattern = "\\.(bib|csl|css|js|rds|RDS|csv|txt|json|xml|yaml|yml)$",
+        full.names = TRUE
+      )
+      if (length(aux_files) > 0) {
+        for (aux_file in aux_files) {
+          file.copy(aux_file, file.path(temp_dir, basename(aux_file)))
+        }
+      }
+
       # Create a temporary output file
       temp_html <- file.path(
         temp_dir,
@@ -197,56 +210,15 @@ simple_md_to_html <- function(path) {
   content <- readLines(path, warn = FALSE)
   content <- paste(content, collapse = "\n")
 
-  # Basic markdown to HTML conversion
-  content <- gsub("^# (.+)$", "<h1>\\1</h1>", content, perl = TRUE)
-  content <- gsub("^## (.+)$", "<h2>\\1</h2>", content, perl = TRUE)
-  content <- gsub("^### (.+)$", "<h3>\\1</h3>", content, perl = TRUE)
-
-  # Convert markdown images: ![alt](url)
-  content <- gsub(
-    "!\\[([^\\]]*)\\]\\(([^\\)]+)\\)",
-    "<img src=\"\\2\" alt=\"\\1\">",
+  # Use the shared markdown utilities with language-specific code blocks
+  content <- markdown_to_html_full(
     content,
-    perl = TRUE
+    use_complex_code_blocks = FALSE,
+    language_specific = TRUE
   )
 
-  # Convert markdown links: [text](url)
-  content <- gsub(
-    "\\[([^\\]]+)\\]\\(([^\\)]+)\\)",
-    "<a href=\"\\2\">\\1</a>",
-    content,
-    perl = TRUE
-  )
-
-  # Convert code blocks
-  content <- gsub(
-    "```r\\n([^`]+)\\n```",
-    "<pre><code class='language-r'>\\1</code></pre>",
-    content,
-    perl = TRUE
-  )
-  content <- gsub(
-    "```\\n([^`]+)\\n```",
-    "<pre><code>\\1</code></pre>",
-    content,
-    perl = TRUE
-  )
-
-  # Convert inline code: `code`
-  content <- gsub(
-    "`([^`]+)`",
-    "<code>\\1</code>",
-    content,
-    perl = TRUE
-  )
-
-  # Convert paragraphs
-  lines <- strsplit(content, "\n")[[1]]
-  lines <- gsub("^$", "</p><p>", lines)
-  content <- paste(lines, collapse = "\n")
-  content <- paste0("<p>", content, "</p>")
-  content <- gsub("<p></p>", "", content, fixed = TRUE)
-
+  # The old version used a different paragraph wrapping method,
+  # but the new utility method should work better
   return(content)
 }
 

@@ -93,76 +93,12 @@ markdown_to_html <- function(path) {
   content <- readLines(path, warn = FALSE)
   content <- paste(content, collapse = "\n")
 
-  # Convert markdown images: ![alt](url)
-  content <- gsub(
-    "!\\[([^\\]]*)\\]\\(([^\\)]+)\\)",
-    "<img src=\"\\2\" alt=\"\\1\">",
+  # Use the shared markdown utilities
+  return(markdown_to_html_full(
     content,
-    perl = TRUE
-  )
-
-  # Convert markdown links: [text](url)
-  content <- gsub(
-    "\\[([^\\]]+)\\]\\(([^\\)]+)\\)",
-    "<a href=\"\\2\">\\1</a>",
-    content,
-    perl = TRUE
-  )
-
-  # Convert inline code: `code`
-  content <- gsub(
-    "`([^`]+)`",
-    "<code>\\1</code>",
-    content,
-    perl = TRUE
-  )
-
-  # Process line by line for headers
-  lines <- strsplit(content, "\n")[[1]]
-  html_lines <- character(length(lines))
-
-  for (i in seq_along(lines)) {
-    line <- lines[i]
-
-    # Handle headers
-    if (grepl("^# ", line)) {
-      html_lines[i] <- gsub("^# (.+)$", "<h1>\\1</h1>", line)
-    } else if (grepl("^## ", line)) {
-      html_lines[i] <- gsub("^## (.+)$", "<h2>\\1</h2>", line)
-    } else if (grepl("^### ", line)) {
-      html_lines[i] <- gsub("^### (.+)$", "<h3>\\1</h3>", line)
-    } else if (grepl("^#### ", line)) {
-      html_lines[i] <- gsub("^#### (.+)$", "<h4>\\1</h4>", line)
-    } else if (line == "") {
-      # Empty lines become paragraph breaks
-      html_lines[i] <- ""
-    } else {
-      # Regular text lines
-      html_lines[i] <- line
-    }
-  }
-
-  # Convert to paragraphs
-  content <- paste(html_lines, collapse = "\n")
-
-  # Split by double newlines to create paragraphs
-  paragraphs <- strsplit(content, "\n\n")[[1]]
-  paragraphs <- paragraphs[paragraphs != ""]
-
-  # Filter out HTML comments and empty paragraphs
-  paragraphs <- paragraphs[!grepl("^\\s*<!--.*-->\\s*$", paragraphs)]
-  paragraphs <- paragraphs[paragraphs != ""]
-
-  # Wrap non-header content in paragraphs
-  for (i in seq_along(paragraphs)) {
-    para <- paragraphs[i]
-    # Skip if it's already a header or empty
-    if (!grepl("^<h[1-6]", para) && para != "") {
-      paragraphs[i] <- paste0("<p>", para, "</p>")
-    }
-  }
-
-  return(paste(paragraphs, collapse = "\n\n"))
+    use_complex_code_blocks = TRUE,
+    language_specific = FALSE
+  ))
 }
 
 copy_readme_images <- function(pkg, readme_path) {

@@ -89,8 +89,8 @@ extract_searchable_content <- function(rd_lines) {
 
     content <- paste(rd_lines, collapse = " ")
 
-    # Extract content from common Rd sections while removing markup
-    # Remove directives but keep their content
+    # Extract content from common Rd sections and clean markup
+    # Handle specific Rd sections for search content
     content <- gsub("\\\\name\\{([^}]+)\\}", "\\1", content, perl = TRUE)
     content <- gsub("\\\\alias\\{([^}]+)\\}", "", content, perl = TRUE) # Remove aliases
     content <- gsub("\\\\title\\{([^}]+)\\}", "\\1", content, perl = TRUE)
@@ -109,14 +109,11 @@ extract_searchable_content <- function(rd_lines) {
         perl = TRUE
     )
 
-    # Remove remaining Rd markup
-    content <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", content, perl = TRUE)
-    content <- gsub("\\\\[a-zA-Z]+", "", content, perl = TRUE)
-    content <- gsub("\\{|\\}", "", content, perl = TRUE)
+    # Use shared utility for final Rd cleanup
+    content <- convert_rd_to_html(content)
 
-    # Clean up whitespace
-    content <- gsub("\\s+", " ", content, perl = TRUE)
-    content <- trimws(content)
+    # Remove HTML tags for search text
+    content <- gsub("<[^>]*>", "", content)
 
     return(content)
 }
@@ -145,15 +142,9 @@ extract_vignette_text <- function(content) {
     content <- content[!grepl("^```\\{r", content)]
     content <- content[!grepl("^```$", content)]
 
-    # Remove markdown markup
+    # Remove markdown markup using shared utility
     text <- paste(content, collapse = " ")
-    text <- gsub("#+ ", "", text) # Remove headers
-    text <- gsub("\\*\\*([^*]+)\\*\\*", "\\1", text) # Bold
-    text <- gsub("\\*([^*]+)\\*", "\\1", text) # Italic
-    text <- gsub("`([^`]+)`", "\\1", text) # Code
-    text <- gsub("\\[([^]]+)\\]\\([^)]+\\)", "\\1", text) # Links
-    text <- gsub("\\s+", " ", text) # Normalize whitespace
-    text <- trimws(text)
+    text <- clean_text_for_search(text)
 
     return(text)
 }
