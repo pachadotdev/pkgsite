@@ -69,12 +69,29 @@ build_reference_index <- function(pkg = ".") {
 }
 
 build_reference_topic <- function(pkg, topic, lazy = FALSE) {
-  src_path <- file.path(pkg$src_path, "man", paste0(topic, ".Rd"))
   dst_path <- file.path("reference", paste0(topic, ".html"))
+
+  # Find the R source file for this topic
+  r_files <- list.files(
+    file.path(pkg$src_path, "R"),
+    pattern = "\\.R$",
+    full.names = TRUE
+  )
+
+  topic_info <- NULL
+  for (r_file in r_files) {
+    topic_info <- extract_roxygen_for_topic(r_file, topic)
+    if (!is.null(topic_info)) break
+  }
+
+  if (is.null(topic_info)) {
+    warning("Could not find roxygen documentation for topic: ", topic)
+    return(invisible())
+  }
 
   if (lazy && file.exists(file.path(pkg$dst_path, dst_path))) {
     if (
-      file.info(src_path)$mtime <=
+      file.info(topic_info$source_file)$mtime <=
         file.info(file.path(pkg$dst_path, dst_path))$mtime
     ) {
       return(invisible())
@@ -83,9 +100,8 @@ build_reference_topic <- function(pkg, topic, lazy = FALSE) {
 
   message("Writing ", dst_path)
 
-  # Simple Rd to HTML conversion
-  rd_content <- readLines(src_path, warn = FALSE)
-  html_content <- simple_rd_to_html(rd_content, topic)
+  # Convert roxygen to HTML
+  html_content <- roxygen_to_html(topic_info)
 
   data <- list(
     pagetitle = topic,
@@ -94,6 +110,210 @@ build_reference_topic <- function(pkg, topic, lazy = FALSE) {
 
   render_page(pkg, "reference-topic", data, dst_path)
   invisible()
+}
+
+extract_roxygen_for_topic <- function(r_file, topic) {
+  lines <- readLines(r_file, warn = FALSE)
+
+  # Find the function definition
+  func_pattern <- paste0("^", topic, "\\s*<-\\s*function")
+  func_line <- which(grepl(func_pattern, lines))
+
+  if (length(func_line) == 0) {
+    return(NULL)
+  }
+
+  # Look backwards from the function definition to find roxygen comments
+  roxygen_lines <- c()
+  for (i in (func_line[1] - 1):1) {
+    if (grepl("^#'", lines[i])) {
+      roxygen_lines <- c(lines[i], roxygen_lines)
+    } else if (grepl("^\\s*$", lines[i])) {
+      # Skip empty lines
+      next
+    } else {
+      # Hit non-roxygen, non-empty line
+      break
+    }
+  }
+
+  if (length(roxygen_lines) == 0) {
+    return(NULL)
+  }
+
+  return(list(
+    topic = topic,
+    source_file = r_file,
+    roxygen_lines = roxygen_lines
+  ))
+}
+
+roxygen_to_html <- function(topic_info) {
+  lines <- topic_info$roxygen_lines
+
+  # Remove #' prefix and process
+  content_lines <- gsub("^#'\\s?", "", lines)
+
+  # Parse roxygen sections
+  title <- ""
+  description <- ""
+  params <- list()
+  examples <- ""
+  current_section <- "title"
+  current_content <- c()
+
+  for (line in content_lines) {
+    if (grepl("^@description", line)) {
+      if (current_section == "title") {
+        title <- paste(current_content, collapse = " ")
+      }
+      current_section <- "description"
+      current_content <- c()
+    } else if (grepl("^@param", line)) {
+      if (current_section == "description") {
+        description <- paste(current_content, collapse = "\n")
+      }
+      # Extract param name and description
+      param_match <- regexpr("^@param\\s+(\\S+)\\s+(.*)", line, perl = TRUE)
+      if (param_match[1] > 0) {
+        param_name <- sub("^@param\\s+(\\S+)\\s+.*", "\\1", line, perl = TRUE)
+        param_desc <- sub("^@param\\s+\\S+\\s+(.*)", "\\1", line, perl = TRUE)
+        params[[param_name]] <- param_desc
+      }
+    } else if (grepl("^@examples", line)) {
+      if (current_section == "description") {
+        description <- paste(current_content, collapse = "\n")
+      }
+      current_section <- "examples"
+      current_content <- c()
+    } else if (grepl("^@", line)) {
+      # Other roxygen tags, skip for now
+      next
+    } else {
+      current_content <- c(current_content, line)
+    }
+  }
+
+  # Handle the last section
+  if (current_section == "title" && length(current_content) > 0) {
+    title <- paste(current_content, collapse = " ")
+  } else if (current_section == "description" && length(current_content) > 0) {
+    description <- paste(current_content, collapse = "\n")
+  } else if (current_section == "examples" && length(current_content) > 0) {
+    examples <- paste(current_content, collapse = "\n")
+  }
+
+  # Convert to HTML
+  html <- paste0("<h1>", title, "</h1>\n")
+
+  if (nchar(description) > 0) {
+    # Process description as markdown
+    desc_html <- markdown_to_html_simple(description)
+    html <- paste0(html, "<h2>Description</h2>\n", desc_html, "\n")
+  }
+
+  if (length(params) > 0) {
+    html <- paste0(
+      html,
+      "<h2>Arguments</h2>\n<table class=\"ref-arguments\">\n"
+    )
+    for (param_name in names(params)) {
+      param_desc_html <- markdown_to_html_simple(params[[param_name]])
+      html <- paste0(
+        html,
+        "<tr><td><strong>",
+        param_name,
+        "</strong></td><td>",
+        param_desc_html,
+        "</td></tr>\n"
+      )
+    }
+    html <- paste0(html, "</table>\n")
+  }
+
+  if (nchar(examples) > 0) {
+    # Process examples - remove \dontrun{} wrapper if present
+    examples_clean <- gsub(
+      "\\\\dontrun\\{([^}]*)\\}",
+      "\\1",
+      examples,
+      perl = TRUE
+    )
+    html <- paste0(
+      html,
+      "<h2>Examples</h2>\n<pre><code>",
+      examples_clean,
+      "</code></pre>\n"
+    )
+  }
+
+  return(html)
+}
+
+markdown_to_html_simple <- function(text) {
+  # Convert markdown-style links [function_name()] to HTML links
+  text <- gsub(
+    "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
+    '<a href="../reference/\\1.html"><code>\\1\\2</code></a>',
+    text,
+    perl = TRUE
+  )
+
+  # Convert `code` to <code>code</code>
+  text <- gsub("`([^`]+)`", "<code>\\1</code>", text, perl = TRUE)
+
+  # Convert * list items to HTML lists
+  if (grepl("\\n\\s*\\*\\s+", text, perl = TRUE)) {
+    lines <- strsplit(text, "\n")[[1]]
+    list_lines <- c()
+    in_list <- FALSE
+
+    for (line in lines) {
+      if (grepl("^\\s*\\*\\s+", line)) {
+        if (!in_list) {
+          list_lines <- c(list_lines, "<ul>")
+          in_list <- TRUE
+        }
+        item_text <- sub("^\\s*\\*\\s+", "", line)
+        # Process basic markdown in list items but don't recursively call
+        item_text <- gsub(
+          "`([^`]+)`",
+          "<code>\\1</code>",
+          item_text,
+          perl = TRUE
+        )
+        item_text <- gsub(
+          "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
+          '<a href="../reference/\\1.html"><code>\\1\\2</code></a>',
+          item_text,
+          perl = TRUE
+        )
+        list_lines <- c(list_lines, paste0("<li>", item_text, "</li>"))
+      } else if (nchar(trimws(line)) == 0 && in_list) {
+        # Empty line in list, continue
+        next
+      } else {
+        if (in_list) {
+          list_lines <- c(list_lines, "</ul>")
+          in_list <- FALSE
+        }
+        if (nchar(trimws(line)) > 0) {
+          list_lines <- c(list_lines, paste0("<p>", line, "</p>"))
+        }
+      }
+    }
+
+    if (in_list) {
+      list_lines <- c(list_lines, "</ul>")
+    }
+
+    text <- paste(list_lines, collapse = "\n")
+  } else {
+    # Not a list, wrap in paragraph
+    text <- paste0("<p>", text, "</p>")
+  }
+
+  return(text)
 }
 
 get_reference_topics <- function(pkg) {
@@ -107,9 +327,9 @@ get_reference_topics <- function(pkg) {
 }
 
 simple_rd_to_html <- function(rd_lines, topic) {
-  # Remove roxygen2 comments and other unwanted lines
+  # Remove roxygen2 comments but preserve empty lines
   rd_lines <- rd_lines[!grepl("^%", rd_lines)]
-  rd_lines <- rd_lines[rd_lines != ""]
+  # Don't remove empty lines - they might be important for formatting (especially in examples)
 
   content <- paste(rd_lines, collapse = "\n")
 
@@ -154,15 +374,27 @@ simple_rd_to_html <- function(rd_lines, topic) {
   # Clean up any remaining Rd markup and extra whitespace
   content <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", content, perl = TRUE)
   content <- gsub("\\\\[a-zA-Z]+", "", content, perl = TRUE)
-  content <- gsub("\\n\\s*\\n+", "\n", content, perl = TRUE)
+  # Don't collapse newlines inside <pre><code> blocks (examples)
+  content <- preserve_code_blocks_whitespace(content)
   content <- gsub("^\\s+|\\s+$", "", content, perl = TRUE)
 
   return(content)
 }
 
 parse_and_replace_description <- function(content) {
+  cat(
+    "DEBUG: parse_and_replace_description called\n",
+    file = "/tmp/debug.log",
+    append = TRUE
+  )
+
   # Find the description section using a more sophisticated approach
   if (grepl("\\\\description\\{", content)) {
+    cat(
+      "DEBUG: Found description section\n",
+      file = "/tmp/debug.log",
+      append = TRUE
+    )
     # Extract the entire description block including nested braces
     start_pos <- regexpr("\\\\description\\{", content)[1]
     if (start_pos > 0) {
@@ -184,18 +416,46 @@ parse_and_replace_description <- function(content) {
         }
       }
 
+      cat(
+        "DEBUG: end_idx=",
+        end_idx,
+        " start_idx=",
+        start_idx,
+        "\n",
+        file = "/tmp/debug.log",
+        append = TRUE
+      )
+
       if (end_idx > start_idx) {
+        cat(
+          "DEBUG: Extracting description content\n",
+          file = "/tmp/debug.log",
+          append = TRUE
+        )
+
         # Extract the description content
         desc_section <- substr(content, start_pos, end_idx)
-        desc_content <- gsub(
-          "\\\\description\\{(.*)\\}$",
-          "\\1",
+        # Extract content between the outermost braces by removing the wrapper
+        desc_content <- substr(
           desc_section,
-          perl = TRUE
+          nchar("\\description{") + 1,
+          nchar(desc_section) - 1
+        )
+
+        cat(
+          "DEBUG: About to call clean_rd_content\n",
+          file = "/tmp/debug.log",
+          append = TRUE
         )
 
         # Clean up the description content
         desc_content <- clean_rd_content(desc_content)
+
+        cat(
+          "DEBUG: clean_rd_content returned\n",
+          file = "/tmp/debug.log",
+          append = TRUE
+        )
 
         # Replace the description section with cleaned HTML
         before <- substr(content, 1, start_pos - 1)
@@ -240,17 +500,16 @@ parse_and_replace_examples <- function(content) {
       if (end_idx > start_idx) {
         # Extract the examples content
         examples_section <- substr(content, start_pos, end_idx)
+        # Use a more careful extraction that preserves newlines
         examples_content <- gsub(
-          "\\\\examples\\{(.*)\\}$",
+          "^\\\\examples\\{([\\s\\S]*)\\}$",
           "\\1",
           examples_section,
           perl = TRUE
         )
 
         # Clean up the examples content while preserving structure
-        examples_content <- clean_examples_content(examples_content)
-
-        # Replace the examples section with cleaned HTML
+        examples_content <- clean_examples_content(examples_content) # Replace the examples section with cleaned HTML
         before <- substr(content, 1, start_pos - 1)
         after <- substr(content, end_idx + 1, nchar(content))
         content <- paste0(
@@ -266,6 +525,51 @@ parse_and_replace_examples <- function(content) {
   return(content)
 }
 
+preserve_code_blocks_whitespace <- function(content) {
+  # Preserve whitespace inside <pre><code>...</code></pre> blocks
+  # First, extract all code blocks
+  code_blocks <- list()
+  block_counter <- 1
+
+  while (grepl("<pre><code>[\\s\\S]*?</code></pre>", content, perl = TRUE)) {
+    match <- regexpr("<pre><code>[\\s\\S]*?</code></pre>", content, perl = TRUE)
+    if (match[1] == -1) {
+      break
+    }
+
+    # Extract the matched code block
+    start_pos <- match[1]
+    end_pos <- start_pos + attr(match, "match.length") - 1
+    code_block <- substr(content, start_pos, end_pos)
+
+    # Store it with a placeholder
+    placeholder <- paste0("###CODEBLOCK", block_counter, "###")
+    code_blocks[[placeholder]] <- code_block
+
+    # Replace in content with placeholder
+    before_part <- substr(content, 1, start_pos - 1)
+    after_part <- substr(content, end_pos + 1, nchar(content))
+    content <- paste0(before_part, placeholder, after_part)
+
+    block_counter <- block_counter + 1
+  }
+
+  # Now collapse newlines in the non-code content
+  content <- gsub("\\n\\s*\\n+", "\n", content, perl = TRUE)
+
+  # Restore code blocks with original whitespace
+  for (placeholder in names(code_blocks)) {
+    content <- gsub(
+      placeholder,
+      code_blocks[[placeholder]],
+      content,
+      fixed = TRUE
+    )
+  }
+
+  return(content)
+}
+
 clean_examples_content <- function(text) {
   # Remove \dontrun{} wrapper silently - just extract the content inside
   text <- gsub("\\\\dontrun\\{([^}]*)\\}", "\\1", text, perl = TRUE)
@@ -277,27 +581,73 @@ clean_examples_content <- function(text) {
   # Clean up any remaining braces
   text <- gsub("\\{|\\}", "", text, perl = TRUE)
 
-  # Normalize whitespace but preserve line breaks for code readability
-  text <- gsub("\\n\\s*\\n+", "\n", text, perl = TRUE) # Collapse multiple empty lines
-  text <- gsub("^\\s+|\\s+$", "", text, perl = TRUE) # Trim start/end
+  # Preserve ALL whitespace structure - only trim start and end
+  text <- gsub("^\\s+|\\s+$", "", text, perl = TRUE) # Trim start/end only
 
   return(text)
 }
 
 clean_rd_content <- function(text) {
-  # Convert common Rd markup to HTML or plain text
-  text <- gsub(
-    "\\\\link\\[=([^\\]]+)\\]\\{([^}]+)\\}",
-    '<a href="../reference/\\1.html">\\2</a>',
-    text,
-    perl = TRUE
-  ) # Convert \link[=name]{text} to clickable links
+  cat(
+    "DEBUG: clean_rd_content called!\n",
+    file = "/tmp/debug.log",
+    append = TRUE
+  )
+
+  # Just return the text for now to test if the function is working
+  return(text)
+
+  message(
+    "DEBUG: Starting clean_rd_content with: ",
+    substr(text, 1, 100),
+    "..."
+  )
+
+  # Process nested structures first - handle \code{\link[=name]{text}} patterns
+  # This needs to be done before individual \code{} and \link{} processing
+  tryCatch(
+    {
+      text <- gsub(
+        "\\\\code\\{\\\\link\\[=([^\\]]+)\\]\\{([^}]+)\\}\\}",
+        '<code><a href="../reference/\\1.html">\\2</a></code>',
+        text,
+        perl = TRUE
+      )
+      message(
+        "DEBUG: After nested code+link processing: ",
+        substr(text, 1, 100),
+        "..."
+      )
+    },
+    error = function(e) {
+      message("ERROR in nested code+link gsub: ", e$message)
+      # Continue with original text if there's an error
+    }
+  )
+
+  # Convert \link[=name]{text} to clickable links
+  tryCatch(
+    {
+      text <- gsub(
+        "\\\\link\\[=([^\\]]+)\\]\\{([^}]+)\\}",
+        '<a href="../reference/\\1.html">\\2</a>',
+        text,
+        perl = TRUE
+      )
+      message("DEBUG: After link processing")
+    },
+    error = function(e) {
+      message("ERROR in link gsub: ", e$message)
+    }
+  )
+
+  # Convert \link{} to clickable links
   text <- gsub(
     "\\\\link\\{([^}]+)\\}",
     '<a href="../reference/\\1.html">\\1</a>',
     text,
     perl = TRUE
-  ) # Convert \link{} to clickable links
+  )
 
   # Handle markdown-style links [function_name()] - these come from roxygen2
   text <- gsub(
@@ -307,29 +657,60 @@ clean_rd_content <- function(text) {
     perl = TRUE
   )
 
-  text <- gsub("\\\\code\\{([^}]+)\\}", "<code>\\1</code>", text, perl = TRUE) # Convert \code{}
+  # Convert \code{} to HTML code tags
+  text <- gsub("\\\\code\\{([^}]+)\\}", "<code>\\1</code>", text, perl = TRUE)
+
+  # Convert other formatting
   text <- gsub(
     "\\\\strong\\{([^}]+)\\}",
     "<strong>\\1</strong>",
     text,
     perl = TRUE
-  ) # Convert \strong{}
-  text <- gsub("\\\\emph\\{([^}]+)\\}", "<em>\\1</em>", text, perl = TRUE) # Convert \emph{}
+  )
+  text <- gsub("\\\\emph\\{([^}]+)\\}", "<em>\\1</em>", text, perl = TRUE)
 
-  # Convert itemize/enumerate lists to HTML lists
-  text <- gsub("\\\\itemize\\{([^}]*)\\}", "<ul>\\1</ul>", text, perl = TRUE)
-  text <- gsub("\\\\item\\s+", "<li>", text, perl = TRUE)
-  text <- gsub("</li>\\s*<li>", "</li><li>", text, perl = TRUE) # Clean up adjacent list items
-  text <- gsub("<li>([^<]*)</ul>", "<li>\\1</li></ul>", text, perl = TRUE) # Close last list item
+  # Handle itemize lists with a more systematic approach
+  if (grepl("\\\\itemize\\{", text)) {
+    # Replace \itemize{ with <ul> and mark where it ends
+    text <- gsub("\\\\itemize\\{", "ITEMIZE_START<ul>", text, perl = TRUE)
 
-  # Remove any remaining unhandled Rd commands
-  text <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", text, perl = TRUE)
-  text <- gsub("\\\\[a-zA-Z]+", "", text, perl = TRUE)
+    # Replace \item with <li>
+    text <- gsub("\\\\item\\s+", "<li>", text, perl = TRUE)
+
+    # Now we need to find the closing } for the original \itemize and replace it with </ul>
+    # This is tricky with regex, so let's use a simple heuristic:
+    # Since we know the structure should be clean from roxygen2, we can assume
+    # the } that closes the itemize comes after all the list items
+
+    # First, let's close any open <li> tags before we close the list
+    # This regex looks for <li> followed by content, then either another <li> or the end
+    text <- gsub(
+      "<li>([^<]*?)(?=<li>|ITEMIZE_END|$)",
+      "<li>\\1</li>",
+      text,
+      perl = TRUE
+    )
+
+    # Now find the } that should close the itemize and replace with </ul>
+    # We'll look for the first } after our ITEMIZE_START marker
+    text <- gsub(
+      "ITEMIZE_START(<ul>.*?)\\}",
+      "\\1</li></ul>",
+      text,
+      perl = TRUE
+    )
+  }
+
+  # Clean up any remaining unhandled Rd commands (but be more careful)
+  text <- gsub("\\\\dontrun\\{([^}]*)\\}", "\\1", text, perl = TRUE) # Remove \dontrun but keep content
+  text <- gsub("\\\\[a-zA-Z]+\\{([^}]*)\\}", "\\1", text, perl = TRUE) # Remove other commands
+  text <- gsub("\\\\[a-zA-Z]+", "", text, perl = TRUE) # Remove command names without braces
 
   # Clean up structural patterns
   text <- gsub("\\{\\s*\\{", "", text, perl = TRUE) # Remove {{ patterns
   text <- gsub("\\}\\s*\\}", "", text, perl = TRUE) # Remove }} patterns
-  text <- gsub("\\{|\\}", "", text, perl = TRUE) # Remove remaining single braces
+  # Remove remaining single braces (the problematic regex is replaced with this simpler one)
+  text <- gsub("\\{|\\}", "", text, perl = TRUE)
 
   # Clean up whitespace but preserve some structure for lists
   text <- gsub("\\n\\s*\\n+", "\n", text, perl = TRUE) # Collapse multiple newlines

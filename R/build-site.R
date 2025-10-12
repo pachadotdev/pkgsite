@@ -18,7 +18,16 @@
 #' @export
 #' @examples
 #' \dontrun{
-#'  build_site()
+#' build_site()
+#'
+#' # Preview the site after building
+#' build_site(preview = TRUE)
+#'
+#' # Specify a URL to create a CNAME file
+#' build_site(url = "https://yourdomain.com")
+#'
+#' # Only rebuild if source is newer than destination
+#' build_site(lazy = TRUE)
 #' }
 build_site <- function(
   pkg = ".",
