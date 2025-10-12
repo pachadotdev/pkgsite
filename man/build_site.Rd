@@ -4,7 +4,7 @@
 \alias{build_site}
 \title{Build a minimal pkgdown website}
 \usage{
-build_site(pkg = ".", lazy = FALSE, preview = FALSE, quiet = TRUE)
+build_site(pkg = ".", lazy = FALSE, preview = FALSE, quiet = TRUE, url = NULL)
 }
 \arguments{
 \item{pkg}{Path to package}
@@ -14,6 +14,8 @@ build_site(pkg = ".", lazy = FALSE, preview = FALSE, quiet = TRUE)
 \item{preview}{Whether to preview the site after building}
 
 \item{quiet}{Whether to suppress build messages}
+
+\item{url}{Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)}
 }
 \description{
 \code{build_site()} creates a simple static documentation site with:

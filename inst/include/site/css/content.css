@@ -27,7 +27,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-size: small;
+  font-size: 16px; /* Doubled from typical 'small' (usually ~12px) to 16px */
   font-family: "Noto Sans", "Lucida Grande", "Lucida Sans Unicode", Arial, Verdana, Helvetica, sans-serif;
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -329,4 +329,57 @@ IMG.img_slide {
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+/* MathJax styling */
+.MathJax {
+  font-size: 1em !important;
+}
+
+.MathJax_Display {
+  margin: 1em 0 !important;
+}
+
+/* MathJax SVG styling */
+mjx-container[jax="SVG"] {
+  /* overflow-x: auto; */
+  overflow-y: visible;
+  max-width: 100%;
+  display: inline-block;
+}
+
+/* Display math (block equations) */
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+/* Inline math */
+mjx-container[jax="SVG"][display="false"] {
+  display: inline-block !important;
+  vertical-align: baseline !important;
+  margin: 0 0.1em;
+  transform: translateY(-0.3em) !important;
+  position: relative !important;
+}
+
+/* Target the SVG elements directly for better alignment */
+mjx-container[jax="SVG"][display="false"] svg {
+  vertical-align: baseline !important;
+  position: relative !important;
+  top: -0.1em !important;
+}
+
+/* SVG elements should inherit text color for dark mode */
+[data-theme="dark"] mjx-container[jax="SVG"] svg {
+  color: var(--text-color);
+}
+
+/* Ensure SVG math scales properly on different screen sizes */
+@media (max-width: 768px) {
+  mjx-container[jax="SVG"] {
+    max-width: 100%;
+    /* overflow-x: auto; */
+  }
 }

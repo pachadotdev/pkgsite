@@ -7,6 +7,34 @@
   <title>{{#pagetitle}}{{pagetitle}} • {{/pagetitle}}{{#site}}{{site.title}}{{/site}}</title>
   <link rel="stylesheet" href="{{#site}}{{site.root}}{{/site}}menu.css">
   <link rel="stylesheet" href="{{#site}}{{site.root}}{{/site}}content.css">
+  
+  <!-- MathJax Configuration -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)'], ['$', '$']],
+        displayMath: [['\\[', '\\]'], ['$$', '$$']],
+        processEscapes: true,
+        processEnvironments: true,
+        packages: {'[+]': ['ams', 'newcommand', 'configmacros']}
+      },
+      svg: {
+        fontCache: 'global',
+        scale: 1.5,  /* Scale SVG math to 150% */
+        minScale: 0.5,
+        mtextInheritFont: false,
+        merrorInheritFont: true,
+        mathmlSpacing: false,
+        exFactor: 0.5  /* Adjust baseline for better alignment */
+      },
+      options: {
+        ignoreHtmlClass: 'tex2jax_ignore',
+        processHtmlClass: 'tex2jax_process'
+      }
+    };
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 </head>
 <body>
 <div class="main-container">

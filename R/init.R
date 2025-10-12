@@ -12,7 +12,21 @@ init_site <- function(pkg = ".") {
     "-- Initialising minimal site ",
     paste(rep("-", 54), collapse = "")
   ))
+
+  # Preserve CNAME file if it exists
+  cname_path <- file.path(pkg$dst_path, "CNAME")
+  cname_backup <- NULL
+  if (file.exists(cname_path)) {
+    cname_backup <- readLines(cname_path, warn = FALSE)
+    message("Preserving existing CNAME file")
+  }
+
   dir.create(pkg$dst_path, recursive = TRUE, showWarnings = FALSE)
+
+  # Restore CNAME file if it was backed up
+  if (!is.null(cname_backup)) {
+    writeLines(cname_backup, cname_path)
+  }
 
   # Copy minimal assets
   copy_minimal_assets(pkg)

@@ -2,6 +2,7 @@
 
 export(build_home)
 export(build_home_index)
+export(build_news)
 export(build_reference)
 export(build_reference_index)
 export(build_search_index)
