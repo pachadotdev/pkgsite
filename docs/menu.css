@@ -3,11 +3,12 @@
 #menu {
   width: 280px;
   min-width: 280px;
-  background-color: #f8f9fa;
-  border-right: 1px solid #dee2e6;
+  background-color: var(--menu-bg);
+  border-right: 1px solid var(--border-color);
   overflow-y: auto;
   padding: 1em;
   box-sizing: border-box;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 #menu h1 {
@@ -15,24 +16,51 @@
   margin-bottom: 1.5em;
 }
 
+/* Theme toggle button */
+#menu > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#theme-toggle {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 0.3em;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+#theme-toggle:hover {
+  background-color: var(--border-color);
+}
+
 /* Search styling */
 .search-container {
   margin-bottom: 1.5em;
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
 }
 
 #search-box {
-  width: 100%;
+  flex: 1;
   padding: 8px 12px;
-  border: 1px solid #dee2e6;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   font-size: 0.9em;
   box-sizing: border-box;
-  background-color: #fff;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 #search-box:focus {
   outline: none;
-  border-color: #2d58b7;
+  border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(45, 88, 183, 0.2);
 }
 
@@ -46,47 +74,39 @@
   display: block;
   font-weight: bold;
   font-size: 0.95em;
-  color: #495057;
+  color: var(--text-color);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.5em;
   padding-bottom: 0.25em;
-  border-bottom: 2px solid #2d58b7;
+  border-bottom: 2px solid var(--accent-color);
+  transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 #menu label a {
-  text-decoration: none;
   color: inherit;
-  padding: 0;
+  text-decoration: none;
 }
+
+/* Menu link styling */
 
 #menu a {
   display: block;
-  padding: 0.4em 0.5em;
-  color: #495057;
+  padding: 0.4em 0.8em;
+  color: var(--menu-link-color);
   text-decoration: none;
   border-radius: 4px;
-  margin-bottom: 2px;
-  transition: all 0.2s ease;
+  margin-bottom: 0.2em;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #menu a:hover {
-  background-color: #e9ecef;
-  color: #2d58b7;
+  background-color: var(--border-color);
+  color: var(--accent-color);
 }
 
 #menu a:visited {
-  color: #495057;
+  color: var(--menu-link-color);
 }
 
-#menu a:visited:hover {
-  color: #2d58b7;
-}
 
-#menu h1 {
-  font-size: 1.2em;
-  color: #2d58b7;
-  margin-bottom: 1em;
-  padding-bottom: 0.5em;
-  border-bottom: 1px solid #dee2e6;
-}

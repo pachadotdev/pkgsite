@@ -7,10 +7,11 @@
   </div>
 
   <div class="search-container">
-    <input type="text" id="search-box" placeholder="Search..."></div>
+    <input type="text" id="search-box" placeholder="Search..."><button id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">💡</button>
+  </div>
 
   <div class="submenu">
-    <label style="border-bottom: 0;"><a href="../index.html">Home 🏠</a></label>
+    <label style="border-bottom: 0;"><a style="padding-left: 0;" href="../index.html">Home 🏠</a></label>
   </div>
 
   <div class="submenu">
@@ -38,9 +39,27 @@
 init_site(pkg = ".")
 </pre>
 <h2>Arguments</h2><table class="ref-arguments"><tr><td><strong>pkg</strong></td><td>Path to package</td></tr></table><h2>Description</h2><p><code>init_site()</code> creates the output directory and copies basic CSS files.</p>
-<footer><p>Last updated: 2025-10-11 17:35:56</p>
+<footer><p>Last updated: 2025-10-11 20:37:33</p>
 </footer><script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Theme toggle functionality
+  const themeToggle = document.getElementById('theme-toggle');
+  const currentTheme = localStorage.getItem('theme') || 'light';
+
+  // Apply saved theme
+  document.documentElement.setAttribute('data-theme', currentTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', function() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+  }
+
+  // Search functionality
   const searchBox = document.getElementById('search-box');
   if (!searchBox) return;
 
