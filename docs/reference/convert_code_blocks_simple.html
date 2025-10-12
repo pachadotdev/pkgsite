@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>pkgsite documentation • pkgsite</title><link rel="stylesheet" href="menu.css"><link rel="stylesheet" href="content.css"></head><body>
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>convert_code_blocks_simple • pkgsite</title><link rel="stylesheet" href="../menu.css"><link rel="stylesheet" href="../content.css"></head><body>
 <div class="main-container">
 <div id="menu">
   <div>
@@ -11,68 +11,59 @@
   </div>
 
   <div class="submenu">
-    <label style="border-bottom: 0;"><a style="padding-left: 0;" href="index.html">Home 🏠</a></label>
+    <label style="border-bottom: 0;"><a style="padding-left: 0;" href="../index.html">Home 🏠</a></label>
   </div>
 
   <div class="submenu">
     <label>Functions</label>
-    <a href="reference/as_pkgsite.html">as_pkgsite</a>
-    <a href="reference/build_home.html">build_home</a>
-    <a href="reference/build_reference.html">build_reference</a>
-    <a href="reference/build_search_index.html">build_search_index</a>
-    <a href="reference/build_site.html">build_site</a>
-    <a href="reference/build_vignettes.html">build_vignettes</a>
-    <a href="reference/clean_rd_content.html">clean_rd_content</a>
-    <a href="reference/clean_text_for_search.html">clean_text_for_search</a>
-    <a href="reference/convert_angle_bracket_urls.html">convert_angle_bracket_urls</a>
-    <a href="reference/convert_code_blocks_simple.html">convert_code_blocks_simple</a>
-    <a href="reference/convert_code_blocks.html">convert_code_blocks</a>
-    <a href="reference/convert_inline_code.html">convert_inline_code</a>
-    <a href="reference/convert_markdown_headers_simple.html">convert_markdown_headers_simple</a>
-    <a href="reference/convert_markdown_headers.html">convert_markdown_headers</a>
-    <a href="reference/convert_markdown_images.html">convert_markdown_images</a>
-    <a href="reference/convert_markdown_links.html">convert_markdown_links</a>
-    <a href="reference/convert_markdown_lists.html">convert_markdown_lists</a>
-    <a href="reference/convert_rd_to_html.html">convert_rd_to_html</a>
-    <a href="reference/extract_rd_section.html">extract_rd_section</a>
-    <a href="reference/init_site.html">init_site</a>
-    <a href="reference/markdown_to_html_full.html">markdown_to_html_full</a>
-    <a href="reference/render_page.html">render_page</a>
-    <a href="reference/wrap_paragraphs.html">wrap_paragraphs</a>
+    <a href="../reference/as_pkgsite.html">as_pkgsite</a>
+    <a href="../reference/build_home.html">build_home</a>
+    <a href="../reference/build_reference.html">build_reference</a>
+    <a href="../reference/build_search_index.html">build_search_index</a>
+    <a href="../reference/build_site.html">build_site</a>
+    <a href="../reference/build_vignettes.html">build_vignettes</a>
+    <a href="../reference/clean_rd_content.html">clean_rd_content</a>
+    <a href="../reference/clean_text_for_search.html">clean_text_for_search</a>
+    <a href="../reference/convert_angle_bracket_urls.html">convert_angle_bracket_urls</a>
+    <a href="../reference/convert_code_blocks_simple.html">convert_code_blocks_simple</a>
+    <a href="../reference/convert_code_blocks.html">convert_code_blocks</a>
+    <a href="../reference/convert_inline_code.html">convert_inline_code</a>
+    <a href="../reference/convert_markdown_headers_simple.html">convert_markdown_headers_simple</a>
+    <a href="../reference/convert_markdown_headers.html">convert_markdown_headers</a>
+    <a href="../reference/convert_markdown_images.html">convert_markdown_images</a>
+    <a href="../reference/convert_markdown_links.html">convert_markdown_links</a>
+    <a href="../reference/convert_markdown_lists.html">convert_markdown_lists</a>
+    <a href="../reference/convert_rd_to_html.html">convert_rd_to_html</a>
+    <a href="../reference/extract_rd_section.html">extract_rd_section</a>
+    <a href="../reference/init_site.html">init_site</a>
+    <a href="../reference/markdown_to_html_full.html">markdown_to_html_full</a>
+    <a href="../reference/render_page.html">render_page</a>
+    <a href="../reference/wrap_paragraphs.html">wrap_paragraphs</a>
   </div>
 
   <div class="submenu">
     <label>Vignettes</label>
-    <a href="vignettes/css.html">Editing the CSS template</a>
-    <a href="vignettes/images.html">Inserting images</a>
+    <a href="../vignettes/css.html">Editing the CSS template</a>
+    <a href="../vignettes/images.html">Inserting images</a>
   </div>
 
   <div class="submenu">
     <label>News</label>
-    <a href="news/index.html">Changelog</a>
+    <a href="../news/index.html">Changelog</a>
   </div>
 </div>
 <div id="content">
-<h1>pkgsite</h1>
-
-<p><a href="https://lifecycle.r-lib.org/articles/stages.html#stable"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle:
-stable"></a>
-<a href="https://buymeacoffee.com/pacha"><img src="https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg" alt="BuyMeACoffee"></a>
-<!-- badges: end --></p>
-
-<p>The goal of pkgsite is to build a minimal website for an R package, with
-a navigation menu and a content area. It is inspired by the
-<a href="https://pkgdown.r-lib.org/">pkgdown</a> package but it is much simpler and
-it does not have as many features.</p>
-
-<p>Like pkgdown, pkgsite provides a <code>build_site()</code> function that builds the
-site and saves it in the <code>docs/</code> folder of the package. The site can
-then be published using GitHub Pages or any other static site hosting
-service.</p>
-
-<p>This package does not provide bootstrap or any other CSS framework, it
-uses a simple CSS template that can be easily customized.</p>
-<footer><p>Last updated: 2025-10-12 10:38:21</p>
+<h1>Convert markdown code blocks to HTML (simple regex method)</h1>
+<h2>Usage</h2><pre class="ref-usage">
+convert_code_blocks_simple(content, language_specific = FALSE)
+</pre>
+<h2>Arguments</h2><table class="ref-arguments"><tr><td><strong>content</strong></td><td>Character string containing markdown content</td></tr><tr><td><strong>language_specific</strong></td><td>Whether to preserve language specifications</td></tr></table><h2>Value</h2><p>
+Character string with code blocks converted to HTML
+</p>
+<h2>Description</h2><p>
+A simpler approach using regex for cases where order doesn't matter
+</p>
+<footer><p>Last updated: 2025-10-12 10:38:22</p>
 </footer><script>
 document.addEventListener('DOMContentLoaded', function() {
   // Theme toggle functionality
@@ -99,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let searchIndex = [];
 
   // Load search index
-  fetch('search.json')
+  fetch('../search.json')
     .then(response => response.json())
     .then(data => {
       searchIndex = data;

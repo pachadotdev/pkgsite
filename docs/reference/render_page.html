@@ -22,8 +22,23 @@
     <a href="../reference/build_search_index.html">build_search_index</a>
     <a href="../reference/build_site.html">build_site</a>
     <a href="../reference/build_vignettes.html">build_vignettes</a>
+    <a href="../reference/clean_rd_content.html">clean_rd_content</a>
+    <a href="../reference/clean_text_for_search.html">clean_text_for_search</a>
+    <a href="../reference/convert_angle_bracket_urls.html">convert_angle_bracket_urls</a>
+    <a href="../reference/convert_code_blocks_simple.html">convert_code_blocks_simple</a>
+    <a href="../reference/convert_code_blocks.html">convert_code_blocks</a>
+    <a href="../reference/convert_inline_code.html">convert_inline_code</a>
+    <a href="../reference/convert_markdown_headers_simple.html">convert_markdown_headers_simple</a>
+    <a href="../reference/convert_markdown_headers.html">convert_markdown_headers</a>
+    <a href="../reference/convert_markdown_images.html">convert_markdown_images</a>
+    <a href="../reference/convert_markdown_links.html">convert_markdown_links</a>
+    <a href="../reference/convert_markdown_lists.html">convert_markdown_lists</a>
+    <a href="../reference/convert_rd_to_html.html">convert_rd_to_html</a>
+    <a href="../reference/extract_rd_section.html">extract_rd_section</a>
     <a href="../reference/init_site.html">init_site</a>
+    <a href="../reference/markdown_to_html_full.html">markdown_to_html_full</a>
     <a href="../reference/render_page.html">render_page</a>
+    <a href="../reference/wrap_paragraphs.html">wrap_paragraphs</a>
   </div>
 
   <div class="submenu">
@@ -32,6 +47,10 @@
     <a href="../vignettes/images.html">Inserting images</a>
   </div>
 
+  <div class="submenu">
+    <label>News</label>
+    <a href="../news/index.html">Changelog</a>
+  </div>
 </div>
 <div id="content">
 <h1>Render page with minimal template</h1>
@@ -39,8 +58,10 @@
 render_page(pkg = ".", name, data, path, quiet = FALSE)
 data_template(pkg = ".", root_path = "")
 </pre>
-<h2>Arguments</h2><table class="ref-arguments"><tr><td><strong>pkg</strong></td><td>Path to package to document.</td></tr><tr><td><strong>name</strong></td><td>Name of the template (e.g. "home", "reference-topic")</td></tr><tr><td><strong>data</strong></td><td>Data for the template.</td></tr><tr><td><strong>path</strong></td><td>Location to create file; relative to destination directory.</td></tr><tr><td><strong>quiet</strong></td><td>If <code>quiet</code>, will suppress output messages</td></tr><tr><td><strong>root_path</strong></td><td>Relative path to site root (automatically calculated)</td></tr></table><h2>Description</h2><p>Each page uses simple templates: "head", "header", "content", and "footer".</p>
-<footer><p>Last updated: 2025-10-11 20:37:33</p>
+<h2>Arguments</h2><table class="ref-arguments"><tr><td><strong>pkg</strong></td><td>Path to package to document.</td></tr><tr><td><strong>name</strong></td><td>Name of the template (e.g. "home", "reference-topic")</td></tr><tr><td><strong>data</strong></td><td>Data for the template.</td></tr><tr><td><strong>path</strong></td><td>Location to create file; relative to destination directory.</td></tr><tr><td><strong>quiet</strong></td><td>If <code>quiet</code>, will suppress output messages</td></tr><tr><td><strong>root_path</strong></td><td>Relative path to site root (automatically calculated)</td></tr></table><h2>Description</h2><p>
+Each page uses simple templates: "head", "header", "content", and "footer".
+</p>
+<footer><p>Last updated: 2025-10-12 10:38:22</p>
 </footer><script>
 document.addEventListener('DOMContentLoaded', function() {
   // Theme toggle functionality

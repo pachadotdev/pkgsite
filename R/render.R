@@ -68,6 +68,9 @@ data_template <- function(pkg = ".", root_path = "") {
   # Get articles
   vignettes <- get_vignettes(pkg)
 
+  # Check for news file
+  has_news_file <- !is.null(find_news_source(pkg))
+
   list(
     package = data_package(pkg),
     site = data_site(pkg, root_path),
@@ -96,7 +99,8 @@ data_template <- function(pkg = ".", root_path = "") {
       })
     } else {
       NULL
-    }
+    },
+    has_news = has_news_file
   )
 }
 
@@ -249,6 +253,19 @@ get_vignette_title <- function(pkg, vignette_file) {
 
   # Final fallback to filename
   return(tools::file_path_sans_ext(vignette_file))
+}
+
+find_news_source <- function(pkg) {
+  candidates <- c("NEWS.md", "NEWS.Rmd", "NEWS", "ChangeLog", "CHANGES")
+
+  for (candidate in candidates) {
+    path <- file.path(pkg$src_path, candidate)
+    if (file.exists(path)) {
+      return(path)
+    }
+  }
+
+  return(NULL)
 }
 
 write_if_different <- function(pkg, contents, path, quiet = FALSE) {

@@ -8,13 +8,13 @@
   {
     "title": "build_home",
     "url": "reference/build_home.html",
-    "content": "build_home Build home section build_home(pkg = \".\", quiet = FALSE, preview = FALSE) build_home_index(pkg = \".\", quiet = FALSE) pkgPath to package quiet Whether to suppress messages preview Whether to preview after building build_home() generates the home page from README.md or index.md",
+    "content": "build_home Build home section build_home(pkg = \".\", quiet = FALSE, preview = FALSE) build_home_index(pkg = \".\", quiet = FALSE) pkgPath to package quiet Whether to suppress messages preview Whether to preview after building build_home() generates the home page from README.md or index.md ",
     "type": "function"
   },
   {
     "title": "build_reference",
     "url": "reference/build_reference.html",
-    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) build_reference_index(pkg = \".\") pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building build_reference() generates reference documentation from Rd files",
+    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) build_reference_index(pkg = \".\") pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building build_reference() generates reference documentation from Rd files ",
     "type": "function"
   },
   {
@@ -26,25 +26,115 @@
   {
     "title": "build_site",
     "url": "reference/build_site.html",
-    "content": "build_site Build a minimal pkgdown website build_site(pkg = \".\", lazy = FALSE, preview = FALSE, quiet = TRUE) pkgPath to package lazy If TRUE, will only rebuild if source is newer than destination preview Whether to preview the site after building quiet Whether to suppress build messages build_site() creates a simple static documentation site with: [=init_site]init_site() [=build_home]build_home() [=build_reference]build_reference() [=build_vignettes]build_vignettes() The site uses a minimal template with a simple sidebar navigation. build_site()",
+    "content": "build_site Build a minimal pkgdown website build_site(pkg = \".\", lazy = FALSE, preview = FALSE, quiet = TRUE) pkgPath to package lazy If TRUE, will only rebuild if source is newer than destination preview Whether to preview the site after building quiet Whether to suppress build messages build_site() creates a simple static documentation site with: init_site() build_home() build_reference() build_vignettes() The site uses a minimal template with a simple sidebar navigation. build_site()",
     "type": "function"
   },
   {
     "title": "build_vignettes",
     "url": "reference/build_vignettes.html",
-    "content": "build_vignettes Build vignettes section build_vignettes(pkg = \".\", lazy = FALSE, quiet = FALSE, preview = FALSE) build_vignettes_index(pkg = \".\") pkgPath to package lazy Whether to skip files that haven't changed quiet Whether to suppress messages preview Whether to preview after building build_vignettes() renders R Markdown files from vignettes/ to vignettes/",
+    "content": "build_vignettes Build vignettes section build_vignettes(pkg = \".\", lazy = FALSE, quiet = FALSE, preview = FALSE) build_vignettes_index(pkg = \".\") pkgPath to package lazy Whether to skip files that haven't changed quiet Whether to suppress messages preview Whether to preview after building build_vignettes() renders R Markdown files from vignettes/ to vignettes/ ",
+    "type": "function"
+  },
+  {
+    "title": "clean_rd_content",
+    "url": "reference/clean_rd_content.html",
+    "content": "clean_rd_content Clean Rd content by removing common LaTeX commands clean_rd_content(content) contentCharacter string containing Rd content Character string with LaTeX commands cleaned Clean Rd content by removing common LaTeX commands",
+    "type": "function"
+  },
+  {
+    "title": "clean_text_for_search",
+    "url": "reference/clean_text_for_search.html",
+    "content": "clean_text_for_search Clean search text by removing markdown and HTML clean_text_for_search(text) textCharacter string containing formatted text Character string with formatting removed for search indexing Clean search text by removing markdown and HTML",
+    "type": "function"
+  },
+  {
+    "title": "convert_angle_bracket_urls",
+    "url": "reference/convert_angle_bracket_urls.html",
+    "content": "convert_angle_bracket_urls Convert angle-bracket URLs to HTML links convert_angle_bracket_urls(content) contentCharacter string containing markdown content Character string with angle-bracket URLs converted to HTML Convert angle-bracket URLs to HTML links",
+    "type": "function"
+  },
+  {
+    "title": "convert_code_blocks_simple",
+    "url": "reference/convert_code_blocks_simple.html",
+    "content": "convert_code_blocks_simple Convert markdown code blocks to HTML (simple regex method) convert_code_blocks_simple(content, language_specific = FALSE) contentCharacter string containing markdown content language_specific Whether to preserve language specifications Character string with code blocks converted to HTML A simpler approach using regex for cases where order doesn't matter",
+    "type": "function"
+  },
+  {
+    "title": "convert_code_blocks",
+    "url": "reference/convert_code_blocks.html",
+    "content": "convert_code_blocks Convert markdown code blocks to HTML convert_code_blocks(content) contentCharacter string containing markdown content Character string with code blocks converted to HTML This function handles both fenced code blocks with language specifications and ensures proper paragraph separation.",
+    "type": "function"
+  },
+  {
+    "title": "convert_inline_code",
+    "url": "reference/convert_inline_code.html",
+    "content": "convert_inline_code Convert markdown inline code to HTML convert_inline_code(content) contentCharacter string containing markdown content Character string with inline code converted to HTML Convert markdown inline code to HTML",
+    "type": "function"
+  },
+  {
+    "title": "convert_markdown_headers_simple",
+    "url": "reference/convert_markdown_headers_simple.html",
+    "content": "convert_markdown_headers_simple Convert markdown headers to HTML (simple regex method) convert_markdown_headers_simple(content) contentCharacter string containing markdown content Character string with headers converted to HTML A simpler approach using regex for multiline content",
+    "type": "function"
+  },
+  {
+    "title": "convert_markdown_headers",
+    "url": "reference/convert_markdown_headers.html",
+    "content": "convert_markdown_headers Convert markdown headers to HTML convert_markdown_headers(content) contentCharacter string containing markdown content Character string with headers converted to HTML Convert markdown headers to HTML",
+    "type": "function"
+  },
+  {
+    "title": "convert_markdown_images",
+    "url": "reference/convert_markdown_images.html",
+    "content": "convert_markdown_images Convert markdown images to HTML convert_markdown_images(content) contentCharacter string containing markdown content Character string with images converted to HTML Convert markdown images to HTML",
+    "type": "function"
+  },
+  {
+    "title": "convert_markdown_links",
+    "url": "reference/convert_markdown_links.html",
+    "content": "convert_markdown_links Convert markdown links to HTML convert_markdown_links(content) contentCharacter string containing markdown content Character string with links converted to HTML Convert markdown links to HTML",
+    "type": "function"
+  },
+  {
+    "title": "convert_markdown_lists",
+    "url": "reference/convert_markdown_lists.html",
+    "content": "convert_markdown_lists Convert markdown lists to HTML convert_markdown_lists(content) contentCharacter string containing markdown content Character string with lists converted to HTML Convert markdown lists to HTML",
+    "type": "function"
+  },
+  {
+    "title": "convert_rd_to_html",
+    "url": "reference/convert_rd_to_html.html",
+    "content": "convert_rd_to_html Convert common Rd commands to HTML convert_rd_to_html(text) textCharacter string containing Rd text Character string with Rd commands converted to HTML Convert common Rd commands to HTML",
+    "type": "function"
+  },
+  {
+    "title": "extract_rd_section",
+    "url": "reference/extract_rd_section.html",
+    "content": "extract_rd_section Extract Rd section content extract_rd_section(content, section_name) contentCharacter string containing Rd content section_name Name of the section to extract (e.g., \"title\", \"description\") Character string with section content Extract Rd section content",
     "type": "function"
   },
   {
     "title": "init_site",
     "url": "reference/init_site.html",
-    "content": "init_site Initialise minimal site infrastructure init_site(pkg = \".\") pkgPath to package init_site() creates the output directory and copies basic CSS files.",
+    "content": "init_site Initialise minimal site infrastructure init_site(pkg = \".\") pkgPath to package init_site() creates the output directory and copies basic CSS files. ",
+    "type": "function"
+  },
+  {
+    "title": "markdown_to_html_full",
+    "url": "reference/markdown_to_html_full.html",
+    "content": "markdown_to_html_full Full markdown to HTML conversion markdown_to_html_full( content, use_complex_code_blocks = TRUE, language_specific = FALSE ) contentCharacter string containing markdown content use_complex_code_blocks Whether to use the complex code block method language_specific Whether to preserve language specifications in code blocks Character string with markdown converted to HTML Applies all markdown conversions in the correct order",
     "type": "function"
   },
   {
     "title": "render_page",
     "url": "reference/render_page.html",
     "content": "render_page Render page with minimal template render_page(pkg = \".\", name, data, path, quiet = FALSE) data_template(pkg = \".\", root_path = \"\") pkgPath to package to document. name Name of the template (e.g. \"home\", \"reference-topic\") data Data for the template. path Location to create file; relative to destination directory. quiet If quiet, will suppress output messages root_path Relative path to site root (automatically calculated) Each page uses simple templates: \"head\", \"header\", \"content\", and \"footer\".",
+    "type": "function"
+  },
+  {
+    "title": "wrap_paragraphs",
+    "url": "reference/wrap_paragraphs.html",
+    "content": "wrap_paragraphs Wrap content in paragraphs wrap_paragraphs(content) contentCharacter string containing HTML content Character string with paragraphs wrapped Takes content and wraps text that isn't already HTML elements in html tags",
     "type": "function"
   },
   {

@@ -14,6 +14,7 @@
 #' @param lazy If `TRUE`, will only rebuild if source is newer than destination
 #' @param preview Whether to preview the site after building
 #' @param quiet Whether to suppress build messages
+#' @param url Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)
 #' @export
 #' @examples
 #' \dontrun{
@@ -23,7 +24,8 @@ build_site <- function(
   pkg = ".",
   lazy = FALSE,
   preview = FALSE,
-  quiet = TRUE
+  quiet = TRUE,
+  url = NULL
 ) {
   pkg <- as_pkgsite(pkg)
 
@@ -41,7 +43,9 @@ build_site <- function(
   }
 
   build_home(pkg, quiet = quiet, preview = FALSE)
+
   build_reference(pkg, lazy = lazy, preview = FALSE)
+
   build_vignettes(
     pkg,
     lazy = lazy,
@@ -49,7 +53,13 @@ build_site <- function(
     preview = FALSE
   )
 
+  build_news(pkg, quiet = quiet, preview = FALSE)
+
   build_search_index(pkg)
+
+  if (!is.null(url)) {
+    write_cname(url, pkg$dst_path)
+  }
 
   message(paste0(
     "-- Finished building minimal site for package ",
