@@ -3,76 +3,9 @@
 
 #' Convert markdown code blocks to HTML
 #'
-#' This function handles both fenced code blocks with language specifications
-#' and ensures proper paragraph separation.
-#'
-#' @param content Character string containing markdown content
-#' @return Character string with code blocks converted to HTML
-convert_code_blocks <- function(content) {
-    # Method 1: Complex placeholder method (for cases where order matters)
-    code_blocks <- list()
-    block_counter <- 1
-
-    # Find all code blocks and store them
-    while (grepl("```[^\\n]*\\n", content)) {
-        # Find the start of a code block
-        start_match <- regexpr("```[^\\n]*\\n", content)
-        if (start_match == -1) {
-            break
-        }
-
-        start_pos <- start_match[1]
-        start_len <- attr(start_match, "match.length")
-
-        # Find the matching end ```
-        remaining <- substr(content, start_pos + start_len, nchar(content))
-        end_match <- regexpr("\\n```(\\n|$)", remaining)
-        if (end_match == -1) {
-            break
-        }
-
-        end_pos <- start_pos + start_len + end_match[1] - 1
-        end_len <- attr(end_match, "match.length")
-
-        # Extract the code content
-        code_content <- substr(content, start_pos + start_len, end_pos)
-        code_blocks[[as.character(block_counter)]] <- paste0(
-            "<pre><code>",
-            code_content,
-            "</code></pre>"
-        )
-
-        # Replace with placeholder, ensuring it's isolated with double newlines
-        placeholder <- paste0("\n\n###CODEBLOCK", block_counter, "###\n\n")
-        before_part <- substr(content, 1, start_pos - 1)
-        after_part <- substr(content, end_pos + end_len, nchar(content))
-
-        # Clean up extra newlines to avoid triple/quadruple newlines
-        before_part <- gsub("\\n+$", "", before_part)
-        after_part <- gsub("^\\n+", "", after_part)
-
-        content <- paste0(before_part, placeholder, after_part)
-
-        block_counter <- block_counter + 1
-    }
-
-    # Later, after other processing, restore code blocks
-    for (i in names(code_blocks)) {
-        placeholder <- paste0("###CODEBLOCK", i, "###")
-        content <- gsub(placeholder, code_blocks[[i]], content, fixed = TRUE)
-    }
-
-    return(content)
-}
-
-#' Convert markdown code blocks to HTML (simple regex method)
-#'
-#' A simpler approach using regex for cases where order doesn't matter
-#'
 #' @param content Character string containing markdown content
 #' @param language_specific Whether to preserve language specifications
-#' @return Character string with code blocks converted to HTML
-convert_code_blocks_simple <- function(content, language_specific = FALSE) {
+convert_code_blocks <- function(content, language_specific = FALSE) {
     if (language_specific) {
         # Convert R-specific code blocks first
         content <- gsub(
@@ -307,41 +240,6 @@ convert_markdown_lists <- function(content) {
 #' @param content Character string containing markdown content
 #' @return Character string with headers converted to HTML
 convert_markdown_headers <- function(content) {
-    # Process line by line for headers
-    lines <- strsplit(content, "\n")[[1]]
-    html_lines <- character(length(lines))
-
-    for (i in seq_along(lines)) {
-        line <- lines[i]
-
-        # Handle headers
-        if (grepl("^# ", line)) {
-            html_lines[i] <- gsub("^# (.+)$", "<h1>\\1</h1>", line)
-        } else if (grepl("^## ", line)) {
-            html_lines[i] <- gsub("^## (.+)$", "<h2>\\1</h2>", line)
-        } else if (grepl("^### ", line)) {
-            html_lines[i] <- gsub("^### (.+)$", "<h3>\\1</h3>", line)
-        } else if (grepl("^#### ", line)) {
-            html_lines[i] <- gsub("^#### (.+)$", "<h4>\\1</h4>", line)
-        } else if (line == "") {
-            # Empty lines become paragraph breaks
-            html_lines[i] <- ""
-        } else {
-            # Regular text lines
-            html_lines[i] <- line
-        }
-    }
-
-    return(paste(html_lines, collapse = "\n"))
-}
-
-#' Convert markdown headers to HTML (simple regex method)
-#'
-#' A simpler approach using regex for multiline content
-#'
-#' @param content Character string containing markdown content
-#' @return Character string with headers converted to HTML
-convert_markdown_headers_simple <- function(content) {
     content <- gsub("^# (.+)$", "<h1>\\1</h1>", content, perl = TRUE)
     content <- gsub("^## (.+)$", "<h2>\\1</h2>", content, perl = TRUE)
     content <- gsub("^### (.+)$", "<h3>\\1</h3>", content, perl = TRUE)
@@ -387,12 +285,10 @@ wrap_paragraphs <- function(content) {
 #' Applies all markdown conversions in the correct order
 #'
 #' @param content Character string containing markdown content
-#' @param use_complex_code_blocks Whether to use the complex code block method
 #' @param language_specific Whether to preserve language specifications in code blocks
 #' @return Character string with markdown converted to HTML
 markdown_to_html_full <- function(
     content,
-    use_complex_code_blocks = TRUE,
     language_specific = FALSE
 ) {
     # Convert images first (before links to avoid conflicts)
@@ -405,11 +301,7 @@ markdown_to_html_full <- function(
     content <- convert_angle_bracket_urls(content)
 
     # Convert code blocks (do this before inline code to avoid conflicts)
-    if (use_complex_code_blocks) {
-        content <- convert_code_blocks(content)
-    } else {
-        content <- convert_code_blocks_simple(content, language_specific)
-    }
+    content <- convert_code_blocks(content, language_specific)
 
     # Convert inline code
     content <- convert_inline_code(content)
@@ -418,13 +310,7 @@ markdown_to_html_full <- function(
     content <- convert_markdown_lists(content)
 
     # Convert headers
-    if (use_complex_code_blocks) {
-        # Use line-by-line method for complex processing
-        content <- convert_markdown_headers(content)
-    } else {
-        # Use simple regex method
-        content <- convert_markdown_headers_simple(content)
-    }
+    content <- convert_markdown_headers(content)
 
     # Wrap in paragraphs
     content <- wrap_paragraphs(content)

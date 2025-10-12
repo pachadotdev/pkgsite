@@ -6,6 +6,20 @@
 #' @param pkg Path to package
 #' @param quiet Whether to suppress messages
 #' @param preview Whether to preview after building
+#'
+#' @examples
+#' \dontrun{
+#' build_home()
+#'
+#' # Hide build messages
+#' build_home(quiet = TRUE)
+#'
+#' # Preview the home page after building
+#' build_home(preview = TRUE)
+#' }
+#'
+#' @return Invisible `TRUE` if the home page was built successfully
+#'
 #' @export
 build_home <- function(
   pkg = ".",
@@ -28,7 +42,6 @@ build_home <- function(
   invisible(pkg)
 }
 
-#' @export
 #' @rdname build_home
 build_home_index <- function(pkg = ".", quiet = FALSE) {
   pkg <- as_pkgsite(pkg)
@@ -96,7 +109,6 @@ markdown_to_html <- function(path) {
   # Use the shared markdown utilities
   return(markdown_to_html_full(
     content,
-    use_complex_code_blocks = TRUE,
     language_specific = FALSE
   ))
 }
@@ -164,5 +176,5 @@ copy_readme_images <- function(pkg, readme_path) {
     }
   }
 
-  invisible()
+  invisible(TRUE)
 }

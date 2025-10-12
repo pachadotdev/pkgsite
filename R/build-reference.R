@@ -1,11 +1,25 @@
 #' Build reference section
 #'
 #' @description
-#' `build_reference()` generates reference documentation from Rd files
+#' `build_reference()` generates reference documentation from Roxygen comments
 #'
 #' @param pkg Path to package
 #' @param lazy Only rebuild if source is newer than destination
 #' @param preview Whether to preview after building
+#'
+#' @examples
+#' \dontrun{
+#' build_reference()
+#'
+#' # Only rebuild if source is newer than destination
+#' build_reference(lazy = TRUE)
+#'
+#' # Preview the site after building
+#' build_reference(preview = TRUE)
+#' }
+#'
+#' @return Invisible `TRUE` if the reference was built successfully
+#'
 #' @export
 build_reference <- function(
   pkg = ".",
@@ -33,10 +47,9 @@ build_reference <- function(
     preview_site(pkg, "reference/index.html")
   }
 
-  invisible(pkg)
+  invisible(TRUE)
 }
 
-#' @export
 #' @rdname build_reference
 build_reference_index <- function(pkg = ".") {
   pkg <- as_pkgsite(pkg)
@@ -321,59 +334,6 @@ markdown_to_html_simple <- function(text) {
   }
 
   return(text)
-}
-
-get_reference_topics <- function(pkg) {
-  # Find all exported functions in R source files
-  r_files <- list.files(
-    file.path(pkg$src_path, "R"),
-    pattern = "\\.R$",
-    full.names = TRUE
-  )
-
-  topics <- c()
-
-  for (r_file in r_files) {
-    lines <- readLines(r_file, warn = FALSE)
-
-    # Find function definitions
-    func_lines <- which(grepl(
-      "^[a-zA-Z_][a-zA-Z0-9_]*\\s*<-\\s*function",
-      lines
-    ))
-
-    for (func_line in func_lines) {
-      # Extract function name
-      func_match <- regmatches(
-        lines[func_line],
-        regexpr("^[a-zA-Z_][a-zA-Z0-9_]*", lines[func_line])
-      )
-      if (length(func_match) == 0) {
-        next
-      }
-
-      func_name <- func_match[1]
-
-      # Look backwards for roxygen comments
-      roxygen_lines <- c()
-      for (i in (func_line - 1):1) {
-        if (grepl("^#'", lines[i])) {
-          roxygen_lines <- c(lines[i], roxygen_lines)
-        } else if (grepl("^\\s*$", lines[i])) {
-          next # Skip empty lines
-        } else {
-          break # Hit non-roxygen line
-        }
-      }
-
-      # Check if function is exported
-      if (any(grepl("^#'\\s*@export", roxygen_lines))) {
-        topics <- c(topics, func_name)
-      }
-    }
-  }
-
-  return(unique(topics))
 }
 
 simple_rd_to_html <- function(rd_lines, topic) {

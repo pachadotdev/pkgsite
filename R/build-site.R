@@ -15,7 +15,9 @@
 #' @param preview Whether to preview the site after building
 #' @param quiet Whether to suppress build messages
 #' @param url Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)
-#' @export
+#'
+#' @return Invisible `TRUE` if the site was built successfully
+#'
 #' @examples
 #' \dontrun{
 #' build_site()
@@ -29,6 +31,8 @@
 #' # Only rebuild if source is newer than destination
 #' build_site(lazy = TRUE)
 #' }
+#'
+#' @export
 build_site <- function(
   pkg = ".",
   lazy = FALSE,
@@ -81,5 +85,5 @@ build_site <- function(
     preview_site(pkg)
   }
 
-  invisible(pkg)
+  invisible(TRUE)
 }

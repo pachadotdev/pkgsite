@@ -7,6 +7,23 @@
 #' @param lazy Whether to skip files that haven't changed
 #' @param quiet Whether to suppress messages
 #' @param preview Whether to preview after building
+#'
+#' @examples
+#' \dontrun{
+#' build_vignettes()
+#'
+#' # Rebuild only if source is newer than destination
+#' build_vignettes(lazy = TRUE)
+#'
+#' # Hide build messages
+#' build_vignettes(quiet = TRUE)
+#'
+#' # Preview the vignettes index after building
+#' build_vignettes(preview = TRUE)
+#' }
+#'
+#' @return Invisible `TRUE` if the vignettes were built successfully
+#'
 #' @export
 build_vignettes <- function(
   pkg = ".",
@@ -37,7 +54,6 @@ build_vignettes <- function(
   invisible(pkg)
 }
 
-#' @export
 #' @rdname build_vignettes
 build_vignettes_index <- function(pkg = ".") {
   pkg <- as_pkgsite(pkg)
@@ -70,7 +86,7 @@ build_vignettes_index <- function(pkg = ".") {
   )
 
   render_page(pkg, "article-index", data, "vignettes/index.html")
-  invisible(pkg)
+  invisible(TRUE)
 }
 
 build_article <- function(pkg, name, lazy = FALSE, quiet = FALSE) {
@@ -224,7 +240,6 @@ simple_md_to_html <- function(path) {
   # Use the shared markdown utilities with language-specific code blocks
   content <- markdown_to_html_full(
     content,
-    use_complex_code_blocks = FALSE,
     language_specific = TRUE
   )
 

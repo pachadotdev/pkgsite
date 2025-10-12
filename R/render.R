@@ -8,7 +8,6 @@
 #' @param data Data for the template.
 #' @param path Location to create file; relative to destination directory.
 #' @param quiet If `quiet`, will suppress output messages
-#' @export
 render_page <- function(
   pkg = ".",
   name,
@@ -57,7 +56,6 @@ render_page_html <- function(pkg, name, data = list(), path = "") {
 }
 
 #' @param root_path Relative path to site root (automatically calculated)
-#' @export
 #' @rdname render_page
 get_existing_reference_topics <- function(pkg) {
   reference_dir <- file.path(pkg$dst_path, "reference")
@@ -81,11 +79,18 @@ get_existing_reference_topics <- function(pkg) {
   sort(topics)
 }
 
+#' Generate template data
+#'
+#' Internal function to generate template data for rendering pages
+#'
+#' @param pkg Path to package
+#' @param root_path Root path for relative links
+#' @return List with template data
 data_template <- function(pkg = ".", root_path = "") {
   pkg <- as_pkgsite(pkg)
 
-  # Get reference topics from existing HTML files
-  topics <- get_existing_reference_topics(pkg)
+  # Get reference topics from exported functions
+  topics <- get_reference_topics(pkg)
 
   # Get articles
   vignettes <- get_vignettes(pkg)
@@ -182,13 +187,58 @@ data_site <- function(pkg, root_path = "") {
 }
 
 get_reference_topics <- function(pkg) {
-  man_dir <- file.path(pkg$src_path, "man")
-  if (!dir.exists(man_dir)) {
-    return(character(0))
+  # Find all exported functions in R source files
+  r_files <- list.files(
+    file.path(pkg$src_path, "R"),
+    pattern = "\\.R$",
+    full.names = TRUE
+  )
+
+  topics <- c()
+
+  for (r_file in r_files) {
+    lines <- readLines(r_file, warn = FALSE)
+
+    # Find function definitions
+    func_lines <- which(grepl(
+      "^[a-zA-Z_][a-zA-Z0-9_]*\\s*<-\\s*function",
+      lines
+    ))
+
+    for (func_line in func_lines) {
+      # Extract function name
+      func_match <- regmatches(
+        lines[func_line],
+        regexpr("^[a-zA-Z_][a-zA-Z0-9_]*", lines[func_line])
+      )
+      if (length(func_match) == 0) {
+        next
+      }
+
+      func_name <- func_match[1]
+
+      # Look backwards for roxygen comments
+      roxygen_lines <- c()
+      if (func_line > 1) {
+        for (i in (func_line - 1):1) {
+          if (length(lines[i]) > 0 && grepl("^#'", lines[i])) {
+            roxygen_lines <- c(lines[i], roxygen_lines)
+          } else if (length(lines[i]) > 0 && grepl("^\\s*$", lines[i])) {
+            next # Skip empty lines
+          } else {
+            break # Hit non-roxygen line
+          }
+        }
+      }
+
+      # Check if function is exported
+      if (any(grepl("^#'\\s*@export", roxygen_lines))) {
+        topics <- c(topics, func_name)
+      }
+    }
   }
-  man_files <- list.files(man_dir, pattern = "\\.Rd$", full.names = TRUE)
-  topics <- tools::file_path_sans_ext(basename(man_files))
-  return(topics)
+
+  return(unique(topics))
 }
 
 get_vignettes <- function(pkg) {

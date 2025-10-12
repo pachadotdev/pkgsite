@@ -7,6 +7,13 @@
 #'
 #' @importFrom jsonlite toJSON
 #'
+#' @examples
+#' \dontrun{
+#' build_search_index()
+#' }
+#'
+#' @return Invisible `TRUE` if the search index was built successfully
+#'
 #' @export
 build_search_index <- function(pkg = ".") {
     pkg <- as_pkgsite(pkg)
@@ -83,7 +90,7 @@ build_search_index <- function(pkg = ".") {
     )
     writeLines(search_json, file.path(pkg$dst_path, "search.json"))
 
-    invisible(pkg)
+    invisible(TRUE)
 }
 
 extract_searchable_content <- function(rd_lines) {

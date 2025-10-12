@@ -4,7 +4,6 @@
 #' `init_site()` creates the output directory and copies basic CSS files.
 #'
 #' @param pkg Path to package
-#' @export
 init_site <- function(pkg = ".") {
   pkg <- as_pkgsite(pkg)
 
