@@ -97,6 +97,9 @@ data_template <- function(pkg = ".", root_path = "") {
   # Check for news file
   has_news_file <- !is.null(find_news_source(pkg))
 
+  # Check for logo file
+  logo_info <- find_logo(pkg)
+
   list(
     package = data_package(pkg),
     site = data_site(pkg, root_path),
@@ -126,7 +129,9 @@ data_template <- function(pkg = ".", root_path = "") {
     } else {
       NULL
     },
-    has_news = has_news_file
+    has_news = has_news_file,
+    has_logo = logo_info$has_logo,
+    logo_path = logo_info$logo_path
   )
 }
 
@@ -337,6 +342,33 @@ find_news_source <- function(pkg) {
   }
 
   return(NULL)
+}
+
+find_logo <- function(pkg) {
+  # Common logo file locations and names
+  logo_locations <- c(
+    "man/figures/logo.svg",
+    "man/figures/logo.png",
+    "man/figures/hexlogo.svg",
+    "man/figures/hexlogo.png",
+    "logo.svg",
+    "logo.png"
+  )
+
+  for (logo_path in logo_locations) {
+    full_path <- file.path(pkg$src_path, logo_path)
+    if (file.exists(full_path)) {
+      return(list(
+        has_logo = TRUE,
+        logo_path = logo_path
+      ))
+    }
+  }
+
+  return(list(
+    has_logo = FALSE,
+    logo_path = NULL
+  ))
 }
 
 write_if_different <- function(pkg, contents, path, quiet = FALSE) {

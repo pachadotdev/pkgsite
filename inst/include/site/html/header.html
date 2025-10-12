@@ -1,7 +1,14 @@
 <div id="menu">
+  {{#has_logo}}
   <div>
-    <h1>{{package.name}} Documentation</h1>
+    <img src="{{#site}}{{site.root}}{{/site}}{{logo_path}}" align="center" height="139" alt="{{package.name}} logo" />
   </div>
+  {{/has_logo}}
+  {{^has_logo}}
+  <div>
+    <h1 style="text-align:center;">{{package.name}} Documentation</h1>
+  </div>
+  {{/has_logo}}
 
   <div class="search-container">
     <input type="text" id="search-box" placeholder="Search..." />

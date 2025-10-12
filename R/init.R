@@ -76,5 +76,31 @@ copy_minimal_assets <- function(pkg = ".") {
     }
   }
 
+  # Copy logo files if they exist
+  logo_locations <- c(
+    "man/figures/logo.svg",
+    "man/figures/logo.png",
+    "man/figures/hexlogo.svg",
+    "man/figures/hexlogo.png",
+    "logo.svg",
+    "logo.png"
+  )
+
+  for (logo_path in logo_locations) {
+    logo_src <- file.path(pkg$src_path, logo_path)
+    if (file.exists(logo_src)) {
+      # Create the destination directory structure
+      logo_dst <- file.path(pkg$dst_path, logo_path)
+      dir.create(dirname(logo_dst), recursive = TRUE, showWarnings = FALSE)
+
+      file.copy(
+        logo_src,
+        logo_dst,
+        overwrite = TRUE
+      )
+      break # Only copy the first logo found
+    }
+  }
+
   invisible()
 }
