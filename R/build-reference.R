@@ -235,10 +235,10 @@ roxygen_to_html <- function(topic_info) {
   if (length(params) > 0) {
     html <- paste0(
       html,
-      "<h2>Arguments</h2>\n<table class=\"ref-arguments\">\n"
+      "<h2>Arguments</h2>\n<table class=\"ref-arguments\">\n<tbody>\n"
     )
     for (param_name in names(params)) {
-      param_desc_html <- markdown_to_html_simple(params[[param_name]])
+      param_desc_html <- markdown_to_html_inline(params[[param_name]])
       html <- paste0(
         html,
         "<tr><td><strong>",
@@ -248,7 +248,7 @@ roxygen_to_html <- function(topic_info) {
         "</td></tr>\n"
       )
     }
-    html <- paste0(html, "</table>\n")
+    html <- paste0(html, "</tbody>\n</table>\n")
   }
 
   if (nchar(examples) > 0) {
@@ -342,6 +342,27 @@ markdown_to_html_simple <- function(text) {
     # Not a list, wrap in paragraph
     text <- paste0("<p>", text, "</p>")
   }
+
+  return(text)
+}
+
+markdown_to_html_inline <- function(text) {
+  # Same as markdown_to_html_simple but without wrapping in <p> tags
+  # Convert markdown-style links [function_name()] to HTML links
+  text <- gsub(
+    "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
+    '<a href="../reference/\\1.html"><code>\\1\\2</code></a>',
+    text,
+    perl = TRUE
+  )
+
+  # Convert `code` to <code>code</code>
+  text <- gsub("`([^`]+)`", "<code>\\1</code>", text, perl = TRUE)
+
+  # Handle simple inline lists (but don't convert to full HTML lists)
+  # Just clean up any excessive whitespace
+  text <- gsub("\\s+", " ", text, perl = TRUE)
+  text <- trimws(text)
 
   return(text)
 }

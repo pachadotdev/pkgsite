@@ -1,10 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# pkgsite
+# pkgsite: Minimal Static HTML Documentation for R Packages
 
 <!-- badges: start -->
-
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/pacha)

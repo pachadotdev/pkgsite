@@ -240,10 +240,40 @@ convert_markdown_lists <- function(content) {
 #' @param content Character string containing markdown content
 #' @return Character string with headers converted to HTML
 convert_markdown_headers <- function(content) {
-    content <- gsub("^# (.+)$", "<h1>\\1</h1>", content, perl = TRUE)
-    content <- gsub("^## (.+)$", "<h2>\\1</h2>", content, perl = TRUE)
-    content <- gsub("^### (.+)$", "<h3>\\1</h3>", content, perl = TRUE)
-    content <- gsub("^#### (.+)$", "<h4>\\1</h4>", content, perl = TRUE)
+    # Use multiline mode with (?m) flag for proper ^ and $ matching
+    content <- gsub("(?m)^# (.+)$", "<h1>\\1</h1>", content, perl = TRUE)
+    content <- gsub("(?m)^## (.+)$", "<h2>\\1</h2>", content, perl = TRUE)
+    content <- gsub("(?m)^### (.+)$", "<h3>\\1</h3>", content, perl = TRUE)
+    content <- gsub("(?m)^#### (.+)$", "<h4>\\1</h4>", content, perl = TRUE)
+    content <- gsub("(?m)^##### (.+)$", "<h5>\\1</h5>", content, perl = TRUE)
+    content <- gsub("(?m)^###### (.+)$", "<h6>\\1</h6>", content, perl = TRUE)
+    return(content)
+}
+
+convert_markdown_emphasis <- function(content) {
+    # Convert bold text **text** or __text__
+    content <- gsub(
+        "\\*\\*([^*]+)\\*\\*",
+        "<strong>\\1</strong>",
+        content,
+        perl = TRUE
+    )
+    content <- gsub("__([^_]+)__", "<strong>\\1</strong>", content, perl = TRUE)
+
+    # Convert italic text *text* or _text_ (but avoid conflicts with bold)
+    content <- gsub(
+        "(?<!\\*)\\*([^*]+)\\*(?!\\*)",
+        "<em>\\1</em>",
+        content,
+        perl = TRUE
+    )
+    content <- gsub(
+        "(?<!_)_([^_]+)_(?!_)",
+        "<em>\\1</em>",
+        content,
+        perl = TRUE
+    )
+
     return(content)
 }
 
@@ -311,6 +341,9 @@ markdown_to_html_full <- function(
 
     # Convert headers
     content <- convert_markdown_headers(content)
+
+    # Convert bold and italic text
+    content <- convert_markdown_emphasis(content)
 
     # Wrap in paragraphs
     content <- wrap_paragraphs(content)

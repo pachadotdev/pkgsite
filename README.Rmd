@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# pkgsite
+# pkgsite: Minimal Static HTML Documentation for R Packages
 
 <!-- badges: start -->
 [![Lifecycle:
