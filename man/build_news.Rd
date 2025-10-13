@@ -11,7 +11,7 @@ build_news(pkg = ".", quiet = TRUE, preview = FALSE)
 
 \item{quiet}{If \code{quiet}, will suppress output messages}
 
-\item{preview}{If \code{TRUE}, the news page will be opened in browser}
+\item{preview}{If \code{TRUE}, the news page will be opened using a local server (requires the \code{servr} package)}
 }
 \value{
 Invisible \code{TRUE} if the news page was built successfully

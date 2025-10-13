@@ -11,6 +11,7 @@ Depends:
     R (>= 4.1)
 Imports:
     jsonlite,
+    pkgload,
     whisker,
     xml2,
     yaml

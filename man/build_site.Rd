@@ -11,7 +11,7 @@ build_site(pkg = ".", lazy = FALSE, preview = FALSE, quiet = TRUE, url = NULL)
 
 \item{lazy}{If \code{TRUE}, will only rebuild if source is newer than destination}
 
-\item{preview}{Whether to preview the site after building}
+\item{preview}{Whether to preview the site after building using a local server (requires the \code{servr} package)}
 
 \item{quiet}{Whether to suppress build messages}
 
@@ -39,7 +39,7 @@ build_site()
 build_site(preview = TRUE)
 
 # Specify a URL to create a CNAME file
-build_site(url = "https://yourdomain.com")
+build_site(url = "yourdomain.com")
 
 # Only rebuild if source is newer than destination
 build_site(lazy = TRUE)

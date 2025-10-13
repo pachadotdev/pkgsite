@@ -16,7 +16,7 @@ build_vignettes_index(pkg = ".")
 
 \item{quiet}{Whether to suppress messages}
 
-\item{preview}{Whether to preview after building}
+\item{preview}{Whether to preview after building using a local server (requires the \code{servr} package)}
 }
 \value{
 Invisible \code{TRUE} if the vignettes were built successfully

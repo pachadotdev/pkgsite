@@ -812,30 +812,11 @@ preserve_code_blocks_whitespace <- function(content) {
 }
 
 #' @importFrom utils capture.output
+#' @importFrom pkgload load_all
 execute_and_format_examples <- function(examples, pkg_path = NULL) {
   # Load the package if specified so its functions are available
   if (!is.null(pkg_path)) {
-    tryCatch(
-      {
-        # Try to load with pkgload first (for development packages)
-        if (requireNamespace("pkgload", quietly = TRUE)) {
-          pkgload::load_all(pkg_path, quiet = TRUE)
-        } else {
-          # Fall back to devtools if available
-          if (requireNamespace("devtools", quietly = TRUE)) {
-            devtools::load_all(pkg_path, quiet = TRUE)
-          } else {
-            warning(
-              "Neither pkgload nor devtools available to load package from source"
-            )
-          }
-        }
-      },
-      error = function(e) {
-        # If loading fails, continue anyway but warn
-        warning("Could not load package from '", pkg_path, "': ", e$message)
-      }
-    )
+    load_all(pkg_path, quiet = TRUE)
   }
 
   # Clean up the examples text first

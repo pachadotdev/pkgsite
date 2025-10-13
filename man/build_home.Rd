@@ -14,7 +14,7 @@ build_home_index(pkg = ".", quiet = FALSE)
 
 \item{quiet}{Whether to suppress messages}
 
-\item{preview}{Whether to preview after building}
+\item{preview}{Whether to preview after building using a local server (requires the \code{servr} package)}
 }
 \value{
 Invisible \code{TRUE} if the home page was built successfully

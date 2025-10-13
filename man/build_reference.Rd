@@ -14,7 +14,7 @@ build_reference_index(pkg = ".")
 
 \item{lazy}{Only rebuild if source is newer than destination}
 
-\item{preview}{Whether to preview after building}
+\item{preview}{Whether to preview after building using a local server (requires the \code{servr} package)}
 }
 \value{
 Invisible \code{TRUE} if the reference was built successfully
