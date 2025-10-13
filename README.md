@@ -4,6 +4,7 @@
 # pkgsite: Minimal Static HTML Documentation for R Packages
 
 <!-- badges: start -->
+
 [![Lifecycle:
 stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![BuyMeACoffee](https://raw.githubusercontent.com/pachadotdev/buymeacoffee-badges/main/bmc-yellow.svg)](https://buymeacoffee.com/pacha)
@@ -21,3 +22,20 @@ service.
 
 This package does not provide bootstrap or any other CSS framework, it
 uses a simple CSS template that can be easily customized.
+
+In a nutshell, here is how to use pkgsite:
+
+``` r
+pak::pkg_install("pachadotdev/pkgsite")
+library(pkgsite)
+
+# Preview the site after building
+build_site(preview = TRUE)
+
+# Specify a URL to create a CNAME file
+# +
+# Only rebuild if source is newer than destination
+# +
+# Preview the site after building
+build_site(url = "https://yourdomain.com", lazy = TRUE, preview = TRUE)
+```

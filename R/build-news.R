@@ -5,7 +5,7 @@
 #'
 #' @param pkg Path to package to document.
 #' @param quiet If `quiet`, will suppress output messages
-#' @param preview If `TRUE`, the news page will be opened in browser
+#' @param preview If `TRUE`, the news page will be opened using a local server (requires the `servr` package)
 #'
 #' @examples
 #' \dontrun{

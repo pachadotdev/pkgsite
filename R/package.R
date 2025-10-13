@@ -6,6 +6,10 @@ as_pkgsite <- function(pkg = ".") {
     return(pkg)
   }
 
+  # Expand tilde and resolve to absolute path
+  pkg <- path.expand(pkg)
+  pkg <- normalizePath(pkg, mustWork = FALSE)
+
   if (!dir.exists(pkg)) {
     stop(pkg, " is not an existing directory", call. = FALSE)
   }
@@ -52,7 +56,23 @@ preview_site <- function(pkg, path = NULL) {
 
   site_path <- file.path(pkg$dst_path, path)
   if (file.exists(site_path)) {
-    message("Preview site at ", site_path)
+    message("Opening site in browser: ", site_path)
+
+    # Open the HTML file directly in the browser
+    if (.Platform$OS.type == "windows") {
+      system(paste("start", shQuote(site_path)))
+    } else if (Sys.info()["sysname"] == "Darwin") {
+      system(paste("open", shQuote(site_path)))
+    } else {
+      # Linux and other Unix-like systems
+      system(paste("xdg-open", shQuote(site_path)))
+    }
+  } else {
+    message("Site file not found: ", site_path)
   }
   invisible()
 }
+
+
+# Helper operator
+`%||%` <- function(a, b) if (is.null(a)) b else a

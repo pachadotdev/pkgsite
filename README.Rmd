@@ -31,3 +31,20 @@ using GitHub Pages or any other static site hosting service.
 
 This package does not provide bootstrap or any other CSS framework, it uses a simple CSS
 template that can be easily customized.
+
+In a nutshell, here is how to use pkgsite:
+
+```r
+pak::pkg_install("pachadotdev/pkgsite")
+library(pkgsite)
+
+# Preview the site after building
+build_site(preview = TRUE)
+
+# Specify a URL to create a CNAME file
+# +
+# Only rebuild if source is newer than destination
+# +
+# Preview the site after building
+build_site(url = "https://yourdomain.com", lazy = TRUE, preview = TRUE)
+```

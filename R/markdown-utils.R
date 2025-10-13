@@ -240,6 +240,46 @@ convert_markdown_lists <- function(content) {
 #' @param content Character string containing markdown content
 #' @return Character string with headers converted to HTML
 convert_markdown_headers <- function(content) {
+    # Split content by <pre><code> blocks to avoid processing headers inside code blocks
+    # Use a placeholder to mark code blocks
+    placeholder_id <- paste0("CODEBLOCK_", sample(10000:99999, 1), "_")
+    code_blocks <- list()
+    block_counter <- 1
+
+    # Extract and replace <pre><code>...</code></pre> blocks with placeholders
+    while (
+        grepl("<pre><code[^>]*>([\\s\\S]*?)</code></pre>", content, perl = TRUE)
+    ) {
+        # Find the first code block
+        match <- regexpr(
+            "<pre><code[^>]*>([\\s\\S]*?)</code></pre>",
+            content,
+            perl = TRUE
+        )
+        if (match[1] != -1) {
+            # Extract the full code block
+            code_block <- substr(
+                content,
+                match[1],
+                match[1] + attr(match, "match.length") - 1
+            )
+
+            # Store it and create placeholder
+            placeholder <- paste0(placeholder_id, block_counter)
+            code_blocks[[placeholder]] <- code_block
+
+            # Replace with placeholder
+            content <- sub(
+                "<pre><code[^>]*>([\\s\\S]*?)</code></pre>",
+                placeholder,
+                content,
+                perl = TRUE
+            )
+            block_counter <- block_counter + 1
+        }
+    }
+
+    # Now process headers on the content without code blocks
     # Use multiline mode with (?m) flag for proper ^ and $ matching
     content <- gsub("(?m)^# (.+)$", "<h1>\\1</h1>", content, perl = TRUE)
     content <- gsub("(?m)^## (.+)$", "<h2>\\1</h2>", content, perl = TRUE)
@@ -247,32 +287,148 @@ convert_markdown_headers <- function(content) {
     content <- gsub("(?m)^#### (.+)$", "<h4>\\1</h4>", content, perl = TRUE)
     content <- gsub("(?m)^##### (.+)$", "<h5>\\1</h5>", content, perl = TRUE)
     content <- gsub("(?m)^###### (.+)$", "<h6>\\1</h6>", content, perl = TRUE)
+
+    # Restore code blocks
+    for (placeholder in names(code_blocks)) {
+        content <- gsub(
+            placeholder,
+            code_blocks[[placeholder]],
+            content,
+            fixed = TRUE
+        )
+    }
+
     return(content)
 }
 
 convert_markdown_emphasis <- function(content) {
-    # Convert bold text **text** or __text__
+    # Process the entire content at once to handle emphasis that spans multiple lines
+    # But first protect code blocks from being processed
+
+    # Check if content contains code blocks - if so, protect them
+    if (grepl("<pre><code", content)) {
+        # Extract code blocks temporarily
+        placeholder_id <- paste0("EMPHASISCODE_", sample(10000:99999, 1), "_")
+        code_blocks <- list()
+        block_counter <- 1
+
+        # Extract and replace <pre><code>...</code></pre> blocks
+        while (
+            grepl(
+                "<pre><code[^>]*>[\\s\\S]*?</code></pre>",
+                content,
+                perl = TRUE
+            )
+        ) {
+            match <- regexpr(
+                "<pre><code[^>]*>[\\s\\S]*?</code></pre>",
+                content,
+                perl = TRUE
+            )
+            if (match[1] != -1) {
+                code_block <- substr(
+                    content,
+                    match[1],
+                    match[1] + attr(match, "match.length") - 1
+                )
+                placeholder <- paste0(placeholder_id, block_counter)
+                code_blocks[[placeholder]] <- code_block
+                content <- sub(
+                    "<pre><code[^>]*>[\\s\\S]*?</code></pre>",
+                    placeholder,
+                    content,
+                    perl = TRUE
+                )
+                block_counter <- block_counter + 1
+            }
+        }
+
+        # Also protect inline code
+        inline_code_blocks <- list()
+        inline_counter <- 1
+        inline_placeholder_id <- paste0(
+            "EMPHASISINLINE_",
+            sample(10000:99999, 1),
+            "_"
+        )
+
+        while (grepl("<code[^>]*>[^<]*</code>", content, perl = TRUE)) {
+            match <- regexpr("<code[^>]*>[^<]*</code>", content, perl = TRUE)
+            if (match[1] != -1) {
+                code_block <- substr(
+                    content,
+                    match[1],
+                    match[1] + attr(match, "match.length") - 1
+                )
+                placeholder <- paste0(inline_placeholder_id, inline_counter)
+                inline_code_blocks[[placeholder]] <- code_block
+                content <- sub(
+                    "<code[^>]*>[^<]*</code>",
+                    placeholder,
+                    content,
+                    perl = TRUE
+                )
+                inline_counter <- inline_counter + 1
+            }
+        }
+    }
+
+    # Process emphasis on the entire content (handles multiline emphasis)
+
+    # Convert bold text **text** (can span multiple lines)
     content <- gsub(
-        "\\*\\*([^*]+)\\*\\*",
+        "\\*\\*([^*]+?)\\*\\*",
         "<strong>\\1</strong>",
         content,
         perl = TRUE
     )
-    content <- gsub("__([^_]+)__", "<strong>\\1</strong>", content, perl = TRUE)
 
-    # Convert italic text *text* or _text_ (but avoid conflicts with bold)
+    # Convert bold text __text__ (can span multiple lines)
     content <- gsub(
-        "(?<!\\*)\\*([^*]+)\\*(?!\\*)",
+        "__([^_]+?)__",
+        "<strong>\\1</strong>",
+        content,
+        perl = TRUE
+    )
+
+    # Convert italic text *text* (but avoid conflicts with bold)
+    content <- gsub(
+        "(?<!\\*)\\*([^*]+?)\\*(?!\\*)",
         "<em>\\1</em>",
         content,
         perl = TRUE
     )
+
+    # For underscores, be conservative - only single words
     content <- gsub(
-        "(?<!_)_([^_]+)_(?!_)",
+        "\\b_([a-zA-Z]+)_\\b",
         "<em>\\1</em>",
         content,
         perl = TRUE
     )
+
+    # Restore code blocks if we extracted any
+    if (exists("code_blocks") && length(code_blocks) > 0) {
+        for (placeholder in names(code_blocks)) {
+            content <- gsub(
+                placeholder,
+                code_blocks[[placeholder]],
+                content,
+                fixed = TRUE
+            )
+        }
+    }
+
+    if (exists("inline_code_blocks") && length(inline_code_blocks) > 0) {
+        for (placeholder in names(inline_code_blocks)) {
+            content <- gsub(
+                placeholder,
+                inline_code_blocks[[placeholder]],
+                content,
+                fixed = TRUE
+            )
+        }
+    }
 
     return(content)
 }
@@ -284,30 +440,79 @@ convert_markdown_emphasis <- function(content) {
 #' @param content Character string containing HTML content
 #' @return Character string with paragraphs wrapped
 wrap_paragraphs <- function(content) {
-    # Split by double newlines to create paragraphs
-    paragraphs <- strsplit(content, "\n\n")[[1]]
-    paragraphs <- paragraphs[paragraphs != ""]
+    # First, protect code blocks from being split by double newlines
+    # Extract all <pre><code>...</code></pre> blocks and replace with placeholders
+    placeholder_id <- paste0("PREBLOCK_", sample(10000:99999, 1), "_")
+    code_blocks <- list()
+    block_counter <- 1
 
-    # Filter out HTML comments and empty paragraphs
-    paragraphs <- paragraphs[!grepl("^\\s*<!--.*-->\\s*$", paragraphs)]
+    # Extract and replace <pre><code>...</code></pre> blocks with placeholders
+    while (
+        grepl("<pre><code[^>]*>[\\s\\S]*?</code></pre>", content, perl = TRUE)
+    ) {
+        match <- regexpr(
+            "<pre><code[^>]*>[\\s\\S]*?</code></pre>",
+            content,
+            perl = TRUE
+        )
+        if (match[1] != -1) {
+            # Extract the full code block
+            code_block <- substr(
+                content,
+                match[1],
+                match[1] + attr(match, "match.length") - 1
+            )
+
+            # Store it and create placeholder
+            placeholder <- paste0(placeholder_id, block_counter)
+            code_blocks[[placeholder]] <- code_block
+
+            # Replace with placeholder
+            content <- sub(
+                "<pre><code[^>]*>[\\s\\S]*?</code></pre>",
+                placeholder,
+                content,
+                perl = TRUE
+            )
+            block_counter <- block_counter + 1
+        }
+    }
+
+    # Now split by double newlines to create paragraphs
+    paragraphs <- strsplit(content, "\n\n")[[1]]
     paragraphs <- paragraphs[paragraphs != ""]
 
     # Wrap non-header content in paragraphs
     for (i in seq_along(paragraphs)) {
         para <- paragraphs[i]
-        # Skip if it's already a header, pre block, list, or empty
+
+        # Skip if it's already HTML, a placeholder, or empty
         if (
             !grepl("^<h[1-6]", para) &&
                 !grepl("^<pre>", para) &&
                 !grepl("^<ul>", para) &&
                 !grepl("^<ol>", para) &&
-                para != ""
+                !grepl("^\\s*<!--", para) && # Skip HTML comments
+                !grepl(placeholder_id, para, fixed = TRUE) && # Skip placeholders
+                para != "" &&
+                !grepl("^<[^>]+>", para) # Skip other HTML tags
         ) {
             paragraphs[i] <- paste0("<p>", para, "</p>")
         }
     }
 
-    return(paste(paragraphs, collapse = "\n\n"))
+    # Restore code blocks
+    result <- paste(paragraphs, collapse = "\n\n")
+    for (placeholder in names(code_blocks)) {
+        result <- gsub(
+            placeholder,
+            code_blocks[[placeholder]],
+            result,
+            fixed = TRUE
+        )
+    }
+
+    return(result)
 }
 
 #' Full markdown to HTML conversion

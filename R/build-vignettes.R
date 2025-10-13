@@ -6,7 +6,7 @@
 #' @param pkg Path to package
 #' @param lazy Whether to skip files that haven't changed
 #' @param quiet Whether to suppress messages
-#' @param preview Whether to preview after building
+#' @param preview Whether to preview after building using a local server (requires the `servr` package)
 #'
 #' @examples
 #' \dontrun{

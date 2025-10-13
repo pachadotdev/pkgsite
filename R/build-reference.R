@@ -5,7 +5,7 @@
 #'
 #' @param pkg Path to package
 #' @param lazy Only rebuild if source is newer than destination
-#' @param preview Whether to preview after building
+#' @param preview Whether to preview after building using a local server (requires the `servr` package)
 #'
 #' @examples
 #' \dontrun{
@@ -114,7 +114,7 @@ build_reference_topic <- function(pkg, topic, lazy = FALSE) {
   message("Writing ", dst_path)
 
   # Convert roxygen to HTML
-  html_content <- roxygen_to_html(topic_info)
+  html_content <- roxygen_to_html(topic_info, pkg)
 
   data <- list(
     pagetitle = topic,
@@ -168,7 +168,7 @@ extract_roxygen_for_topic <- function(r_file, topic) {
   ))
 }
 
-roxygen_to_html <- function(topic_info) {
+roxygen_to_html <- function(topic_info, pkg = NULL) {
   lines <- topic_info$roxygen_lines
 
   # Remove #' prefix and process
@@ -178,50 +178,93 @@ roxygen_to_html <- function(topic_info) {
   title <- ""
   description <- ""
   params <- list()
+  return_value <- ""
   examples <- ""
+  references <- ""
   current_section <- "title"
   current_content <- c()
+  current_param_name <- NULL
+
+  # Helper function to save current section
+  save_current_section <- function() {
+    if (current_section == "title" && length(current_content) > 0) {
+      title <<- paste(current_content, collapse = " ")
+    } else if (
+      current_section == "description" && length(current_content) > 0
+    ) {
+      description <<- paste(current_content, collapse = "\n")
+    } else if (
+      current_section == "param" &&
+        !is.null(current_param_name) &&
+        length(current_content) > 0
+    ) {
+      params[[current_param_name]] <<- paste(current_content, collapse = "\n")
+    } else if (current_section == "return" && length(current_content) > 0) {
+      return_value <<- paste(current_content, collapse = "\n")
+    } else if (current_section == "examples" && length(current_content) > 0) {
+      examples <<- paste(current_content, collapse = "\n")
+    } else if (current_section == "references" && length(current_content) > 0) {
+      references <<- paste(current_content, collapse = "\n")
+    }
+  }
 
   for (line in content_lines) {
-    if (grepl("^@description", line)) {
-      if (current_section == "title") {
-        title <- paste(current_content, collapse = " ")
-      }
+    if (grepl("^@title", line)) {
+      save_current_section()
+      current_section <- "title"
+      # Extract title content after @title
+      title_content <- sub("^@title\\s*", "", line, perl = TRUE)
+      current_content <- if (nchar(title_content) > 0) c(title_content) else c()
+    } else if (grepl("^@description", line)) {
+      save_current_section()
       current_section <- "description"
       current_content <- c()
     } else if (grepl("^@param", line)) {
-      if (current_section == "description") {
-        description <- paste(current_content, collapse = "\n")
-      }
+      save_current_section()
       # Extract param name and description
       param_match <- regexpr("^@param\\s+(\\S+)\\s+(.*)", line, perl = TRUE)
       if (param_match[1] > 0) {
-        param_name <- sub("^@param\\s+(\\S+)\\s+.*", "\\1", line, perl = TRUE)
+        current_param_name <- sub(
+          "^@param\\s+(\\S+)\\s+.*",
+          "\\1",
+          line,
+          perl = TRUE
+        )
         param_desc <- sub("^@param\\s+\\S+\\s+(.*)", "\\1", line, perl = TRUE)
-        params[[param_name]] <- param_desc
+        # Start collecting the parameter description
+        current_content <- c(param_desc)
+        current_section <- "param"
+      }
+    } else if (grepl("^@return", line)) {
+      save_current_section()
+      current_section <- "return"
+      # Extract return content after @return
+      return_content <- sub("^@return\\s*", "", line, perl = TRUE)
+      current_content <- if (nchar(return_content) > 0) {
+        c(return_content)
+      } else {
+        c()
       }
     } else if (grepl("^@examples", line)) {
-      if (current_section == "description") {
-        description <- paste(current_content, collapse = "\n")
-      }
+      save_current_section()
       current_section <- "examples"
       current_content <- c()
+    } else if (grepl("^@references", line)) {
+      save_current_section()
+      current_section <- "references"
+      current_content <- c()
     } else if (grepl("^@", line)) {
-      # Other roxygen tags, skip for now
-      next
+      # Other roxygen tags, save current section and skip
+      save_current_section()
+      current_section <- "unknown"
+      current_content <- c()
     } else {
       current_content <- c(current_content, line)
     }
   }
 
   # Handle the last section
-  if (current_section == "title" && length(current_content) > 0) {
-    title <- paste(current_content, collapse = " ")
-  } else if (current_section == "description" && length(current_content) > 0) {
-    description <- paste(current_content, collapse = "\n")
-  } else if (current_section == "examples" && length(current_content) > 0) {
-    examples <- paste(current_content, collapse = "\n")
-  }
+  save_current_section()
 
   # Convert to HTML
   html <- paste0("<h1>", title, "</h1>\n")
@@ -251,6 +294,76 @@ roxygen_to_html <- function(topic_info) {
     html <- paste0(html, "</tbody>\n</table>\n")
   }
 
+  # Add return section if present
+  if (nchar(return_value) > 0) {
+    html <- paste0(html, "<h2>Return</h2>\n")
+
+    # Check if there are \item entries
+    if (grepl("\\\\item\\{", return_value)) {
+      # Split the content into descriptive text and items
+      lines <- strsplit(return_value, "\n")[[1]]
+      descriptive_text <- c()
+      item_entries <- list()
+
+      for (line in lines) {
+        line <- trimws(line)
+        if (grepl("\\\\item\\{", line)) {
+          # Extract item name and description
+          item_match <- regexpr(
+            "\\\\item\\{([^}]+)\\}\\{([^}]+)\\}",
+            line,
+            perl = TRUE
+          )
+          if (item_match[1] > 0) {
+            item_name <- sub(
+              ".*\\\\item\\{([^}]+)\\}\\{[^}]+\\}.*",
+              "\\1",
+              line,
+              perl = TRUE
+            )
+            item_desc <- sub(
+              ".*\\\\item\\{[^}]+\\}\\{([^}]+)\\}.*",
+              "\\1",
+              line,
+              perl = TRUE
+            )
+            item_entries[[item_name]] <- item_desc
+          }
+        } else if (nchar(line) > 0) {
+          descriptive_text <- c(descriptive_text, line)
+        }
+      }
+
+      # Add descriptive text if present
+      if (length(descriptive_text) > 0) {
+        desc_text <- paste(descriptive_text, collapse = "\n")
+        desc_html <- markdown_to_html_simple(desc_text)
+        html <- paste0(html, desc_html, "\n")
+      }
+
+      # Add table for items if present
+      if (length(item_entries) > 0) {
+        html <- paste0(html, "<table class=\"ref-arguments\">\n<tbody>\n")
+        for (item_name in names(item_entries)) {
+          item_desc_html <- markdown_to_html_inline(item_entries[[item_name]])
+          html <- paste0(
+            html,
+            "<tr><td><strong>",
+            item_name,
+            "</strong></td><td>",
+            item_desc_html,
+            "</td></tr>\n"
+          )
+        }
+        html <- paste0(html, "</tbody>\n</table>\n")
+      }
+    } else {
+      # No \item entries, treat as regular text
+      return_html <- markdown_to_html_simple(return_value)
+      html <- paste0(html, return_html, "\n")
+    }
+  }
+
   if (nchar(examples) > 0) {
     # Check if examples contain \dontrun{}
     has_dontrun <- grepl("\\\\dontrun\\{", examples, perl = TRUE)
@@ -272,8 +385,47 @@ roxygen_to_html <- function(topic_info) {
       )
     } else {
       # Execute examples and show both code and output
-      examples_html <- execute_and_format_examples(examples)
+      examples_html <- execute_and_format_examples(
+        examples,
+        pkg_path = pkg$src_path
+      )
       html <- paste0(html, "<h2>Examples</h2>\n", examples_html)
+    }
+  }
+
+  # Add references section if present
+  if (nchar(references) > 0) {
+    # Process references - split by empty lines to create separate paragraphs
+    ref_lines <- strsplit(references, "\n")[[1]]
+    ref_paragraphs <- c()
+    current_ref <- c()
+
+    for (line in ref_lines) {
+      line <- trimws(line)
+      if (line == "") {
+        if (length(current_ref) > 0) {
+          ref_paragraphs <- c(
+            ref_paragraphs,
+            paste(current_ref, collapse = " ")
+          )
+          current_ref <- c()
+        }
+      } else {
+        current_ref <- c(current_ref, line)
+      }
+    }
+
+    # Add the last reference if any
+    if (length(current_ref) > 0) {
+      ref_paragraphs <- c(ref_paragraphs, paste(current_ref, collapse = " "))
+    }
+
+    # Convert to HTML
+    html <- paste0(html, "<h2>References</h2>\n")
+    for (ref in ref_paragraphs) {
+      if (nchar(trimws(ref)) > 0) {
+        html <- paste0(html, "<p>", ref, "</p>\n")
+      }
     }
   }
 
@@ -281,6 +433,17 @@ roxygen_to_html <- function(topic_info) {
 }
 
 markdown_to_html_simple <- function(text) {
+  # Convert LaTeX equations \eqn{tex}{ascii} to \(tex\)
+  text <- gsub(
+    "\\\\eqn\\{([^}]*)\\}\\{[^}]*\\}",
+    "\\\\(\\1\\\\)",
+    text,
+    perl = TRUE
+  )
+
+  # Convert **bold** to <strong>bold</strong>
+  text <- gsub("\\*\\*([^*]+)\\*\\*", "<strong>\\1</strong>", text, perl = TRUE)
+
   # Convert markdown-style links [function_name()] to HTML links
   text <- gsub(
     "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
@@ -292,62 +455,99 @@ markdown_to_html_simple <- function(text) {
   # Convert `code` to <code>code</code>
   text <- gsub("`([^`]+)`", "<code>\\1</code>", text, perl = TRUE)
 
-  # Convert * list items to HTML lists
-  if (grepl("\\n\\s*\\*\\s+", text, perl = TRUE)) {
-    lines <- strsplit(text, "\n")[[1]]
-    list_lines <- c()
-    in_list <- FALSE
+  # Split into paragraphs by empty lines first
+  paragraphs <- strsplit(text, "\n\\s*\n")[[1]]
+  html_paragraphs <- c()
 
-    for (line in lines) {
-      if (grepl("^\\s*\\*\\s+", line)) {
-        if (!in_list) {
-          list_lines <- c(list_lines, "<ul>")
-          in_list <- TRUE
-        }
-        item_text <- sub("^\\s*\\*\\s+", "", line)
-        # Process basic markdown in list items but don't recursively call
-        item_text <- gsub(
-          "`([^`]+)`",
-          "<code>\\1</code>",
-          item_text,
-          perl = TRUE
-        )
-        item_text <- gsub(
-          "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
-          '<a href="../reference/\\1.html"><code>\\1\\2</code></a>',
-          item_text,
-          perl = TRUE
-        )
-        list_lines <- c(list_lines, paste0("<li>", item_text, "</li>"))
-      } else if (nchar(trimws(line)) == 0 && in_list) {
-        # Empty line in list, continue
-        next
-      } else {
-        if (in_list) {
-          list_lines <- c(list_lines, "</ul>")
-          in_list <- FALSE
-        }
-        if (nchar(trimws(line)) > 0) {
-          list_lines <- c(list_lines, paste0("<p>", line, "</p>"))
+  for (paragraph in paragraphs) {
+    paragraph <- trimws(paragraph)
+    if (nchar(paragraph) == 0) {
+      next
+    }
+
+    # Check if this paragraph contains list items
+    if (grepl("\\n\\s*\\*\\s+", paragraph, perl = TRUE)) {
+      # Convert * list items to HTML lists within this paragraph
+      lines <- strsplit(paragraph, "\n")[[1]]
+      list_lines <- c()
+      in_list <- FALSE
+
+      for (line in lines) {
+        if (grepl("^\\s*\\*\\s+", line)) {
+          if (!in_list) {
+            list_lines <- c(list_lines, "<ul>")
+            in_list <- TRUE
+          }
+          item_text <- sub("^\\s*\\*\\s+", "", line)
+          # Process basic markdown in list items but don't recursively call
+          item_text <- gsub(
+            "`([^`]+)`",
+            "<code>\\1</code>",
+            item_text,
+            perl = TRUE
+          )
+          item_text <- gsub(
+            "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
+            '<a href="../reference/\\1.html"><code>\\1\\2</code></a>',
+            item_text,
+            perl = TRUE
+          )
+          list_lines <- c(list_lines, paste0("<li>", item_text, "</li>"))
+        } else if (nchar(trimws(line)) == 0 && in_list) {
+          # Empty line in list, continue
+          next
+        } else {
+          if (in_list) {
+            list_lines <- c(list_lines, "</ul>")
+            in_list <- FALSE
+          }
+          if (nchar(trimws(line)) > 0) {
+            list_lines <- c(list_lines, line)
+          }
         }
       }
-    }
 
-    if (in_list) {
-      list_lines <- c(list_lines, "</ul>")
-    }
+      if (in_list) {
+        list_lines <- c(list_lines, "</ul>")
+      }
 
-    text <- paste(list_lines, collapse = "\n")
-  } else {
-    # Not a list, wrap in paragraph
-    text <- paste0("<p>", text, "</p>")
+      html_paragraphs <- c(html_paragraphs, paste(list_lines, collapse = "\n"))
+    } else {
+      # Not a list, treat as regular paragraph
+      html_paragraphs <- c(html_paragraphs, paragraph)
+    }
   }
 
-  return(text)
+  # Wrap each paragraph in <p> tags
+  result <- c()
+  for (p in html_paragraphs) {
+    p <- trimws(p)
+    if (nchar(p) > 0) {
+      # Don't wrap if it's already HTML (starts with <)
+      if (grepl("^<", p)) {
+        result <- c(result, p)
+      } else {
+        result <- c(result, paste0("<p>", p, "</p>"))
+      }
+    }
+  }
+
+  return(paste(result, collapse = "\n"))
 }
 
 markdown_to_html_inline <- function(text) {
   # Same as markdown_to_html_simple but without wrapping in <p> tags
+  # Convert LaTeX equations \eqn{tex}{ascii} to \(tex\)
+  text <- gsub(
+    "\\\\eqn\\{([^}]*)\\}\\{[^}]*\\}",
+    "\\\\(\\1\\\\)",
+    text,
+    perl = TRUE
+  )
+
+  # Convert **bold** to <strong>bold</strong>
+  text <- gsub("\\*\\*([^*]+)\\*\\*", "<strong>\\1</strong>", text, perl = TRUE)
+
   # Convert markdown-style links [function_name()] to HTML links
   text <- gsub(
     "\\[([a-zA-Z_][a-zA-Z0-9_]*)(\\(\\))?\\]",
@@ -612,7 +812,32 @@ preserve_code_blocks_whitespace <- function(content) {
 }
 
 #' @importFrom utils capture.output
-execute_and_format_examples <- function(examples) {
+execute_and_format_examples <- function(examples, pkg_path = NULL) {
+  # Load the package if specified so its functions are available
+  if (!is.null(pkg_path)) {
+    tryCatch(
+      {
+        # Try to load with pkgload first (for development packages)
+        if (requireNamespace("pkgload", quietly = TRUE)) {
+          pkgload::load_all(pkg_path, quiet = TRUE)
+        } else {
+          # Fall back to devtools if available
+          if (requireNamespace("devtools", quietly = TRUE)) {
+            devtools::load_all(pkg_path, quiet = TRUE)
+          } else {
+            warning(
+              "Neither pkgload nor devtools available to load package from source"
+            )
+          }
+        }
+      },
+      error = function(e) {
+        # If loading fails, continue anyway but warn
+        warning("Could not load package from '", pkg_path, "': ", e$message)
+      }
+    )
+  }
+
   # Clean up the examples text first
   examples_clean <- gsub("^\\s+|\\s+$", "", examples, perl = TRUE)
 

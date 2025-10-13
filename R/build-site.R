@@ -12,7 +12,7 @@
 #'
 #' @param pkg Path to package
 #' @param lazy If `TRUE`, will only rebuild if source is newer than destination
-#' @param preview Whether to preview the site after building
+#' @param preview Whether to preview the site after building using a local server (requires the `servr` package)
 #' @param quiet Whether to suppress build messages
 #' @param url Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)
 #'
@@ -26,7 +26,7 @@
 #' build_site(preview = TRUE)
 #'
 #' # Specify a URL to create a CNAME file
-#' build_site(url = "https://yourdomain.com")
+#' build_site(url = "yourdomain.com")
 #'
 #' # Only rebuild if source is newer than destination
 #' build_site(lazy = TRUE)
