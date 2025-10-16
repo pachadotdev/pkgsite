@@ -2,19 +2,19 @@
   {
     "title": "build_home",
     "url": "reference/build_home.html",
-    "content": "build_home Build home section build_home(pkg = \".\", quiet = FALSE, preview = FALSE) build_home_index(pkg = \".\", quiet = FALSE) pkgPath to package quiet Whether to suppress messages preview Whether to preview after building Invisible TRUE if the home page was built successfully  build_home() generates the home page from README.md or index.md  build_home() # Hide build messages build_home(quiet = TRUE) # Preview the home page after building build_home(preview = TRUE)",
+    "content": "build_home Build home section build_home(pkg = \".\", quiet = FALSE, preview = FALSE) build_home_index(pkg = \".\", quiet = FALSE) pkgPath to package quiet Whether to suppress messages preview Whether to preview after building using a local server (requires the servr package) Invisible TRUE if the home page was built successfully  build_home() generates the home page from README.md or index.md  build_home() # Hide build messages build_home(quiet = TRUE) # Preview the home page after building build_home(preview = TRUE)",
     "type": "function"
   },
   {
     "title": "build_news",
     "url": "reference/build_news.html",
-    "content": "build_news Build news page build_news(pkg = \".\", quiet = TRUE, preview = FALSE) pkgPath to package to document. quiet If quiet, will suppress output messages preview If TRUE, the news page will be opened in browser Invisible TRUE if the news page was built successfully  Generates a news page from NEWS.md build_news() # Hide build messages build_news(quiet = TRUE) # Preview the news page after building build_news(preview = TRUE)",
+    "content": "build_news Build news page build_news(pkg = \".\", quiet = TRUE, preview = FALSE) pkgPath to package to document. quiet If quiet, will suppress output messages preview If TRUE, the news page will be opened using a local server (requires the servr package) Invisible TRUE if the news page was built successfully  Generates a news page from NEWS.md build_news() # Hide build messages build_news(quiet = TRUE) # Preview the news page after building build_news(preview = TRUE)",
     "type": "function"
   },
   {
     "title": "build_reference",
     "url": "reference/build_reference.html",
-    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) build_reference_index(pkg = \".\") pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building Invisible TRUE if the reference was built successfully  build_reference() generates reference documentation from Roxygen comments  build_reference() # Only rebuild if source is newer than destination build_reference(lazy = TRUE) # Preview the site after building build_reference(preview = TRUE)",
+    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) build_reference_index(pkg = \".\") pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building using a local server (requires the servr package) Invisible TRUE if the reference was built successfully  build_reference() generates reference documentation from Roxygen comments  build_reference() # Only rebuild if source is newer than destination build_reference(lazy = TRUE) # Preview the site after building build_reference(preview = TRUE)",
     "type": "function"
   },
   {
@@ -26,13 +26,13 @@
   {
     "title": "build_site",
     "url": "reference/build_site.html",
-    "content": "build_site Build a minimal pkgdown website build_site(pkg = \".\", lazy = FALSE, preview = FALSE, quiet = TRUE, url = NULL) pkgPath to package lazy If TRUE, will only rebuild if source is newer than destination preview Whether to preview the site after building quiet Whether to suppress build messages url Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages) Invisible TRUE if the site was built successfully  build_site() creates a simple static documentation site with: init_site() build_home() build_reference() build_vignettes() The site uses a minimal template with a simple sidebar navigation. build_site() # Preview the site after building build_site(preview = TRUE) # Specify a URL to create a CNAME file build_site(url = \"https://yourdomain.com\") # Only rebuild if source is newer than destination build_site(lazy = TRUE)",
+    "content": "build_site Build a minimal pkgdown website build_site(pkg = \".\", lazy = FALSE, preview = FALSE, quiet = TRUE, url = NULL) pkgPath to package lazy If TRUE, will only rebuild if source is newer than destination preview Whether to preview the site after building using a local server (requires the servr package) quiet Whether to suppress build messages url Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages) Invisible TRUE if the site was built successfully  build_site() creates a simple static documentation site with: init_site() build_home() build_reference() build_vignettes() The site uses a minimal template with a simple sidebar navigation. build_site() # Preview the site after building build_site(preview = TRUE) # Specify a URL to create a CNAME file build_site(url = \"yourdomain.com\") # Only rebuild if source is newer than destination build_site(lazy = TRUE)",
     "type": "function"
   },
   {
     "title": "build_vignettes",
     "url": "reference/build_vignettes.html",
-    "content": "build_vignettes Build vignettes section build_vignettes(pkg = \".\", lazy = FALSE, quiet = FALSE, preview = FALSE) build_vignettes_index(pkg = \".\") pkgPath to package lazy Whether to skip files that haven't changed quiet Whether to suppress messages preview Whether to preview after building Invisible TRUE if the vignettes were built successfully  build_vignettes() renders R Markdown files from vignettes/ to vignettes/  build_vignettes() # Rebuild only if source is newer than destination build_vignettes(lazy = TRUE) # Hide build messages build_vignettes(quiet = TRUE) # Preview the vignettes index after building build_vignettes(preview = TRUE)",
+    "content": "build_vignettes Build vignettes section build_vignettes(pkg = \".\", lazy = FALSE, quiet = FALSE, preview = FALSE) build_vignettes_index(pkg = \".\") pkgPath to package lazy Whether to skip files that haven't changed quiet Whether to suppress messages preview Whether to preview after building using a local server (requires the servr package) Invisible TRUE if the vignettes were built successfully  build_vignettes() renders R Markdown files from vignettes/ to vignettes/  build_vignettes() # Rebuild only if source is newer than destination build_vignettes(lazy = TRUE) # Hide build messages build_vignettes(quiet = TRUE) # Preview the vignettes index after building build_vignettes(preview = TRUE)",
     "type": "function"
   },
   {

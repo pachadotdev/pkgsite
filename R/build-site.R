@@ -70,6 +70,9 @@ build_site <- function(
 
   build_search_index(pkg)
 
+  # Write last-updated.json for dynamic footer timestamp
+  write_last_updated(pkg)
+
   if (!is.null(url)) {
     write_cname(url, pkg$dst_path)
   }
@@ -84,6 +87,36 @@ build_site <- function(
   if (preview) {
     preview_site(pkg)
   }
+
+  invisible(TRUE)
+}
+
+#' Write last updated timestamp
+#'
+#' @description
+#' Writes a JSON file with the last updated timestamp to avoid
+#' embedding it in every HTML file, which causes large git diffs
+#'
+#' @param pkg Path to package
+#' @importFrom jsonlite toJSON
+#' @keywords internal
+write_last_updated <- function(pkg = ".") {
+  pkg <- as_pkgsite(pkg)
+
+  last_updated_data <- list(
+    last_updated = paste(
+      "Last updated:",
+      format(Sys.time(), "%Y-%m-%d %H:%M:%S")
+    )
+  )
+
+  last_updated_json <- jsonlite::toJSON(
+    last_updated_data,
+    auto_unbox = TRUE,
+    pretty = TRUE
+  )
+
+  writeLines(last_updated_json, file.path(pkg$dst_path, "last-updated.json"))
 
   invisible(TRUE)
 }

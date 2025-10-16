@@ -1,6 +1,6 @@
 Package: pkgsite
 Title: Minimal Static HTML Documentation for R Packages
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Mauricio", "Vargas Sepulveda", , "m.vargas.sepulveda@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-1017-7574"))
 Description: Generate minimal static HTML documentation websites from R packages. 
