@@ -56,26 +56,62 @@
 </div>
 <div id="content">
 <div class="content-wrapper">
-<div class="content-main">
-<h1>Build home section </h1>
-<h2>Description</h2>
-<code>build_home()</code> generates the home page from README.md or index.md
-<h2>Arguments</h2>
-<table class="ref-arguments"><tbody><tr><td><strong>pkg</strong></td><td>Path to package</td></tr><tr><td><strong>quiet</strong></td><td>Whether to suppress messages</td></tr><tr><td><strong>preview</strong></td><td>Whether to preview after building using a local server (requires the <code>servr</code> package)</td></tr></tbody></table><h2>Return</h2>
-<p>Invisible <code>TRUE</code> if the home page was built successfully</p>
-<h2>Examples</h2>
-<pre><code>build_home()
+        <div class="content-main">
+
+<table style="width: 100%;"><tr><td>build_home {pkgsite}</td><td style="text-align: right;">R Documentation</td></tr></table><h2>Build home section</h2>
+
+<h3>Description</h3>
+
+<p><code>build_home()</code> generates the home page from README.md or index.md
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">build_home(pkg = ".", quiet = FALSE, preview = FALSE)
+
+build_home_index(pkg = ".", quiet = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table role="presentation"><tr><td><code id="pkg">pkg</code></td>
+<td>
+Path to package
+</td></tr><tr><td><code id="quiet">quiet</code></td>
+<td>
+Whether to suppress messages
+</td></tr><tr><td><code id="preview">preview</code></td>
+<td>
+Whether to preview after building using a local server (requires the <code>servr</code> package)
+</td></tr></table><h3>Value</h3>
+
+<p>Invisible <code>TRUE</code> if the home page was built successfully
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run:
+build_home()
 
 # Hide build messages
 build_home(quiet = TRUE)
 
 # Preview the home page after building
-build_home(preview = TRUE)</code></pre>
+build_home(preview = TRUE)
+
+## End(Not run)
+
+</code></pre>
+
 
 </div>
-<footer><p id="last-updated">Loading...</p>
+        </div>
+        <footer><p id="last-updated">Loading...</p>
 </footer><script src="../js/footer.js"></script><script src="../js/theme.js"></script><script src="../js/search.js"></script><script src="../js/fontsize.js"></script></div>
 </div>
-</div>
+
 </body></html>
 

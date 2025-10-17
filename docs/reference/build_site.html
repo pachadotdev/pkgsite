@@ -56,20 +56,63 @@
 </div>
 <div id="content">
 <div class="content-wrapper">
-<div class="content-main">
-<h1>Build a minimal pkgdown website </h1>
-<h2>Description</h2>
-<code>build_site()</code> creates a simple static documentation site with:
-<ul><li><a href="../reference/init_site.html"><code>init_site()</code></a></li>
-<li><a href="../reference/build_home.html"><code>build_home()</code></a></li>
-<li><a href="../reference/build_reference.html"><code>build_reference()</code></a></li>
-<li><a href="../reference/build_vignettes.html"><code>build_vignettes()</code></a></li>
-</ul><p>The site uses a minimal template with a simple sidebar navigation.</p>
-<h2>Arguments</h2>
-<table class="ref-arguments"><tbody><tr><td><strong>pkg</strong></td><td>Path to package</td></tr><tr><td><strong>lazy</strong></td><td>If <code>TRUE</code>, will only rebuild if source is newer than destination</td></tr><tr><td><strong>preview</strong></td><td>Whether to preview the site after building using a local server (requires the <code>servr</code> package)</td></tr><tr><td><strong>quiet</strong></td><td>Whether to suppress build messages</td></tr><tr><td><strong>url</strong></td><td>Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)</td></tr></tbody></table><h2>Return</h2>
-<p>Invisible <code>TRUE</code> if the site was built successfully</p>
-<h2>Examples</h2>
-<pre><code>build_site()
+        <div class="content-main">
+
+<table style="width: 100%;"><tr><td>build_site {pkgsite}</td><td style="text-align: right;">R Documentation</td></tr></table><h2>Build a minimal pkgdown website</h2>
+
+<h3>Description</h3>
+
+<p><code>build_site()</code> creates a simple static documentation site with:
+</p>
+
+<ul><li> <p><code>init_site()</code>
+</p>
+</li>
+<li> <p><code>build_home()</code>
+</p>
+</li>
+<li> <p><code>build_reference()</code>
+</p>
+</li>
+<li> <p><code>build_vignettes()</code>
+</p>
+</li></ul><p>The site uses a minimal template with a simple sidebar navigation.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">build_site(pkg = ".", lazy = FALSE, preview = FALSE, quiet = TRUE, url = NULL)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table role="presentation"><tr><td><code id="pkg">pkg</code></td>
+<td>
+Path to package
+</td></tr><tr><td><code id="lazy">lazy</code></td>
+<td>
+If <code>TRUE</code>, will only rebuild if source is newer than destination
+</td></tr><tr><td><code id="preview">preview</code></td>
+<td>
+Whether to preview the site after building using a local server (requires the <code>servr</code> package)
+</td></tr><tr><td><code id="quiet">quiet</code></td>
+<td>
+Whether to suppress build messages
+</td></tr><tr><td><code id="url">url</code></td>
+<td>
+Optional URL for the site, used to create CNAME file (e.g., useful for GitHub Pages)
+</td></tr></table><h3>Value</h3>
+
+<p>Invisible <code>TRUE</code> if the site was built successfully
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run:
+build_site()
 
 # Preview the site after building
 build_site(preview = TRUE)
@@ -78,12 +121,18 @@ build_site(preview = TRUE)
 build_site(url = "yourdomain.com")
 
 # Only rebuild if source is newer than destination
-build_site(lazy = TRUE)</code></pre>
+build_site(lazy = TRUE)
+
+## End(Not run)
+
+</code></pre>
+
 
 </div>
-<footer><p id="last-updated">Loading...</p>
+        </div>
+        <footer><p id="last-updated">Loading...</p>
 </footer><script src="../js/footer.js"></script><script src="../js/theme.js"></script><script src="../js/search.js"></script><script src="../js/fontsize.js"></script></div>
 </div>
-</div>
+
 </body></html>
 

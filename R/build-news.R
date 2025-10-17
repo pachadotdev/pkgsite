@@ -58,10 +58,24 @@ build_news_index <- function(pkg, quiet = FALSE) {
         message("Writing news/index.html")
     }
 
-    # Read and process the NEWS.md file
-    content <- readLines(news_path, warn = FALSE)
+    # Use rmarkdown to convert NEWS.md
+    temp_html <- tempfile(fileext = ".html")
+    suppressMessages(suppressWarnings({
+        rmarkdown::render(
+            input = news_path,
+            output_format = rmarkdown::html_fragment(
+                self_contained = FALSE,
+                pandoc_args = c("--wrap=preserve")
+            ),
+            output_file = temp_html,
+            quiet = TRUE,
+            envir = new.env()
+        )
+    }))
+
+    content <- readLines(temp_html, warn = FALSE)
     content <- paste(content, collapse = "\n")
-    content <- markdown_to_html_full(content)
+    unlink(temp_html)
 
     data <- list(
         pagetitle = "Changelog",

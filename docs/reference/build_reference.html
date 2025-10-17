@@ -56,26 +56,60 @@
 </div>
 <div id="content">
 <div class="content-wrapper">
-<div class="content-main">
-<h1>Build reference section </h1>
-<h2>Description</h2>
-<code>build_reference()</code> generates reference documentation from Roxygen comments
-<h2>Arguments</h2>
-<table class="ref-arguments"><tbody><tr><td><strong>pkg</strong></td><td>Path to package</td></tr><tr><td><strong>lazy</strong></td><td>Only rebuild if source is newer than destination</td></tr><tr><td><strong>preview</strong></td><td>Whether to preview after building using a local server (requires the <code>servr</code> package)</td></tr></tbody></table><h2>Return</h2>
-<p>Invisible <code>TRUE</code> if the reference was built successfully</p>
-<h2>Examples</h2>
-<pre><code>build_reference()
+        <div class="content-main">
+
+<table style="width: 100%;"><tr><td>build_reference {pkgsite}</td><td style="text-align: right;">R Documentation</td></tr></table><h2>Build reference section</h2>
+
+<h3>Description</h3>
+
+<p><code>build_reference()</code> generates reference documentation from Rd files using tools::Rd2HTML
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">build_reference(pkg = ".", lazy = FALSE, preview = FALSE)
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table role="presentation"><tr><td><code id="pkg">pkg</code></td>
+<td>
+Path to package
+</td></tr><tr><td><code id="lazy">lazy</code></td>
+<td>
+Only rebuild if source is newer than destination
+</td></tr><tr><td><code id="preview">preview</code></td>
+<td>
+Whether to preview after building using a local server (requires the <code>servr</code> package)
+</td></tr></table><h3>Value</h3>
+
+<p>Invisible <code>TRUE</code> if the reference was built successfully
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run:
+build_reference()
 
 # Only rebuild if source is newer than destination
 build_reference(lazy = TRUE)
 
 # Preview the site after building
-build_reference(preview = TRUE)</code></pre>
+build_reference(preview = TRUE)
+
+## End(Not run)
+
+</code></pre>
+
 
 </div>
-<footer><p id="last-updated">Loading...</p>
+        </div>
+        <footer><p id="last-updated">Loading...</p>
 </footer><script src="../js/footer.js"></script><script src="../js/theme.js"></script><script src="../js/search.js"></script><script src="../js/fontsize.js"></script></div>
 </div>
-</div>
+
 </body></html>
 

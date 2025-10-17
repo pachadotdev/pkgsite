@@ -2,12 +2,9 @@
 % Please edit documentation in R/build-reference.R
 \name{build_reference}
 \alias{build_reference}
-\alias{build_reference_index}
 \title{Build reference section}
 \usage{
 build_reference(pkg = ".", lazy = FALSE, preview = FALSE)
-
-build_reference_index(pkg = ".")
 }
 \arguments{
 \item{pkg}{Path to package}
@@ -20,7 +17,7 @@ build_reference_index(pkg = ".")
 Invisible \code{TRUE} if the reference was built successfully
 }
 \description{
-\code{build_reference()} generates reference documentation from Roxygen comments
+\code{build_reference()} generates reference documentation from Rd files using tools::Rd2HTML
 }
 \examples{
 \dontrun{

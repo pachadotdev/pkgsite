@@ -14,7 +14,7 @@
   {
     "title": "build_reference",
     "url": "reference/build_reference.html",
-    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) build_reference_index(pkg = \".\") pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building using a local server (requires the servr package) Invisible TRUE if the reference was built successfully  build_reference() generates reference documentation from Roxygen comments  build_reference() # Only rebuild if source is newer than destination build_reference(lazy = TRUE) # Preview the site after building build_reference(preview = TRUE)",
+    "content": "build_reference Build reference section build_reference(pkg = \".\", lazy = FALSE, preview = FALSE) pkgPath to package lazy Only rebuild if source is newer than destination preview Whether to preview after building using a local server (requires the servr package) Invisible TRUE if the reference was built successfully  build_reference() generates reference documentation from Rd files using tools::Rd2HTML  build_reference() # Only rebuild if source is newer than destination build_reference(lazy = TRUE) # Preview the site after building build_reference(preview = TRUE)",
     "type": "function"
   },
   {

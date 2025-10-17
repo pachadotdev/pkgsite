@@ -39,12 +39,45 @@ convert_code_blocks <- function(content, language_specific = FALSE) {
 #' @param content Character string containing markdown content
 #' @return Character string with inline code converted to HTML
 convert_inline_code <- function(content) {
-    content <- gsub(
-        "`([^`]+)`",
-        "<code>\\1</code>",
-        content,
-        perl = TRUE
+    # Function to escape HTML entities in code content
+    escape_html <- function(text) {
+        text <- gsub("&", "&amp;", text, fixed = TRUE)
+        text <- gsub("<", "&lt;", text, fixed = TRUE)
+        text <- gsub(">", "&gt;", text, fixed = TRUE)
+        text <- gsub('"', "&quot;", text, fixed = TRUE)
+        text <- gsub("'", "&#39;", text, fixed = TRUE)
+        return(text)
+    }
+
+    # Find all inline code blocks
+    pattern <- "`([^`]+)`"
+    matches <- gregexpr(pattern, content, perl = TRUE)
+
+    if (matches[[1]][1] == -1) {
+        # No matches found
+        return(content)
+    }
+
+    # Extract matches and their positions
+    match_strings <- regmatches(content, matches)[[1]]
+
+    # Process each match: extract content, escape HTML, wrap in <code>
+    replacements <- sapply(
+        match_strings,
+        function(match) {
+            # Remove surrounding backticks
+            code_content <- sub("^`(.+)`$", "\\1", match, perl = TRUE)
+            # Escape HTML entities
+            escaped_content <- escape_html(code_content)
+            # Return wrapped in code tags
+            return(paste0("<code>", escaped_content, "</code>"))
+        },
+        USE.NAMES = FALSE
     )
+
+    # Replace all matches with their processed versions
+    regmatches(content, matches) <- list(replacements)
+
     return(content)
 }
 
@@ -264,8 +297,11 @@ convert_markdown_headers <- function(content) {
                 match[1] + attr(match, "match.length") - 1
             )
 
-            # Store it and create placeholder
-            placeholder <- paste0(placeholder_id, block_counter)
+            # Store it and create placeholder with leading zeros for uniqueness
+            placeholder <- paste0(
+                placeholder_id,
+                sprintf("%05d", block_counter)
+            )
             code_blocks[[placeholder]] <- code_block
 
             # Replace with placeholder
@@ -331,7 +367,10 @@ convert_markdown_emphasis <- function(content) {
                     match[1],
                     match[1] + attr(match, "match.length") - 1
                 )
-                placeholder <- paste0(placeholder_id, block_counter)
+                placeholder <- paste0(
+                    placeholder_id,
+                    sprintf("%05d", block_counter)
+                )
                 code_blocks[[placeholder]] <- code_block
                 content <- sub(
                     "<pre><code[^>]*>[\\s\\S]*?</code></pre>",
@@ -360,7 +399,10 @@ convert_markdown_emphasis <- function(content) {
                     match[1],
                     match[1] + attr(match, "match.length") - 1
                 )
-                placeholder <- paste0(inline_placeholder_id, inline_counter)
+                placeholder <- paste0(
+                    inline_placeholder_id,
+                    sprintf("%05d", inline_counter)
+                )
                 inline_code_blocks[[placeholder]] <- code_block
                 content <- sub(
                     "<code[^>]*>[^<]*</code>",
@@ -463,8 +505,11 @@ wrap_paragraphs <- function(content) {
                 match[1] + attr(match, "match.length") - 1
             )
 
-            # Store it and create placeholder
-            placeholder <- paste0(placeholder_id, block_counter)
+            # Store it and create placeholder with leading zeros for uniqueness
+            placeholder <- paste0(
+                placeholder_id,
+                sprintf("%05d", block_counter)
+            )
             code_blocks[[placeholder]] <- code_block
 
             # Replace with placeholder
@@ -526,20 +571,21 @@ markdown_to_html_full <- function(
     content,
     language_specific = FALSE
 ) {
-    # Convert images first (before links to avoid conflicts)
+    # CRITICAL: Convert inline code FIRST to protect code content from other conversions
+    # This prevents things like `<aside>` from being interpreted as URLs
+    content <- convert_inline_code(content)
+
+    # Convert images (before links to avoid conflicts)
     content <- convert_markdown_images(content)
 
     # Convert links
     content <- convert_markdown_links(content)
 
-    # Convert angle-bracket URLs
+    # Convert angle-bracket URLs (now safe since inline code is already protected)
     content <- convert_angle_bracket_urls(content)
 
-    # Convert code blocks (do this before inline code to avoid conflicts)
+    # Convert code blocks
     content <- convert_code_blocks(content, language_specific)
-
-    # Convert inline code
-    content <- convert_inline_code(content)
 
     # Convert lists (do this before headers to avoid conflicts)
     content <- convert_markdown_lists(content)

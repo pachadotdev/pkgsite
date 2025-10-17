@@ -102,15 +102,34 @@ markdown_to_html <- function(path) {
     return("")
   }
 
-  # Read content as single string for better regex processing
-  content <- readLines(path, warn = FALSE)
+  # Create a temporary output file
+  temp_html <- tempfile(fileext = ".html")
+
+  # Use rmarkdown::render to convert markdown to HTML
+  # Suppress messages and warnings during rendering
+  suppressMessages(suppressWarnings({
+    rmarkdown::render(
+      input = path,
+      output_format = rmarkdown::html_fragment(
+        self_contained = FALSE,
+        pandoc_args = c(
+          "--wrap=preserve"
+        )
+      ),
+      output_file = temp_html,
+      quiet = TRUE,
+      envir = new.env()
+    )
+  }))
+
+  # Read the generated HTML
+  content <- readLines(temp_html, warn = FALSE)
   content <- paste(content, collapse = "\n")
 
-  # Use the shared markdown utilities
-  return(markdown_to_html_full(
-    content,
-    language_specific = FALSE
-  ))
+  # Clean up temporary file
+  unlink(temp_html)
+
+  return(content)
 }
 
 copy_readme_images <- function(pkg, readme_path) {

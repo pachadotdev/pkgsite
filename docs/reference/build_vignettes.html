@@ -56,15 +56,48 @@
 </div>
 <div id="content">
 <div class="content-wrapper">
-<div class="content-main">
-<h1>Build vignettes section </h1>
-<h2>Description</h2>
-<code>build_vignettes()</code> renders R Markdown files from vignettes/ to vignettes/
-<h2>Arguments</h2>
-<table class="ref-arguments"><tbody><tr><td><strong>pkg</strong></td><td>Path to package</td></tr><tr><td><strong>lazy</strong></td><td>Whether to skip files that haven't changed</td></tr><tr><td><strong>quiet</strong></td><td>Whether to suppress messages</td></tr><tr><td><strong>preview</strong></td><td>Whether to preview after building using a local server (requires the <code>servr</code> package)</td></tr></tbody></table><h2>Return</h2>
-<p>Invisible <code>TRUE</code> if the vignettes were built successfully</p>
-<h2>Examples</h2>
-<pre><code>build_vignettes()
+        <div class="content-main">
+
+<table style="width: 100%;"><tr><td>build_vignettes {pkgsite}</td><td style="text-align: right;">R Documentation</td></tr></table><h2>Build vignettes section</h2>
+
+<h3>Description</h3>
+
+<p><code>build_vignettes()</code> renders R Markdown files from vignettes/ to vignettes/
+</p>
+
+
+<h3>Usage</h3>
+
+<pre><code class="language-R">build_vignettes(pkg = ".", lazy = FALSE, quiet = FALSE, preview = FALSE)
+
+build_vignettes_index(pkg = ".")
+</code></pre>
+
+
+<h3>Arguments</h3>
+
+<table role="presentation"><tr><td><code id="pkg">pkg</code></td>
+<td>
+Path to package
+</td></tr><tr><td><code id="lazy">lazy</code></td>
+<td>
+Whether to skip files that haven't changed
+</td></tr><tr><td><code id="quiet">quiet</code></td>
+<td>
+Whether to suppress messages
+</td></tr><tr><td><code id="preview">preview</code></td>
+<td>
+Whether to preview after building using a local server (requires the <code>servr</code> package)
+</td></tr></table><h3>Value</h3>
+
+<p>Invisible <code>TRUE</code> if the vignettes were built successfully
+</p>
+
+
+<h3>Examples</h3>
+
+<pre><code class="language-R">## Not run:
+build_vignettes()
 
 # Rebuild only if source is newer than destination
 build_vignettes(lazy = TRUE)
@@ -73,12 +106,18 @@ build_vignettes(lazy = TRUE)
 build_vignettes(quiet = TRUE)
 
 # Preview the vignettes index after building
-build_vignettes(preview = TRUE)</code></pre>
+build_vignettes(preview = TRUE)
+
+## End(Not run)
+
+</code></pre>
+
 
 </div>
-<footer><p id="last-updated">Loading...</p>
+        </div>
+        <footer><p id="last-updated">Loading...</p>
 </footer><script src="../js/footer.js"></script><script src="../js/theme.js"></script><script src="../js/search.js"></script><script src="../js/fontsize.js"></script></div>
 </div>
-</div>
+
 </body></html>
 

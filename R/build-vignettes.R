@@ -234,17 +234,26 @@ simple_md_to_html <- function(path) {
     return("")
   }
 
-  content <- readLines(path, warn = FALSE)
+  # Use rmarkdown to convert markdown to HTML
+  temp_html <- tempfile(fileext = ".html")
+
+  suppressMessages(suppressWarnings({
+    rmarkdown::render(
+      input = path,
+      output_format = rmarkdown::html_fragment(
+        self_contained = FALSE,
+        pandoc_args = c("--wrap=preserve")
+      ),
+      output_file = temp_html,
+      quiet = TRUE,
+      envir = new.env()
+    )
+  }))
+
+  content <- readLines(temp_html, warn = FALSE)
   content <- paste(content, collapse = "\n")
+  unlink(temp_html)
 
-  # Use the shared markdown utilities with language-specific code blocks
-  content <- markdown_to_html_full(
-    content,
-    language_specific = TRUE
-  )
-
-  # The old version used a different paragraph wrapping method,
-  # but the new utility method should work better
   return(content)
 }
 
