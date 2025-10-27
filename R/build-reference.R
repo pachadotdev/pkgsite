@@ -52,14 +52,43 @@ build_reference <- function(
   )
 
   for (rd_file in rd_files) {
-    topic <- tools::file_path_sans_ext(basename(rd_file))
+    # Determine all aliases declared in the Rd file. Rd files can document
+    # multiple topics using \alias and roxygen's @rdname will group topics
+    # into a single Rd file. We should render pages for any exported alias so
+    # links like reference/card.html work even when card's Rd is shared.
+    rd_parsed <- tryCatch(
+      tools::parse_Rd(rd_file),
+      error = function(e) NULL
+    )
 
-    # Skip if not exported (and we have a NAMESPACE file)
-    if (!is.null(exported_topics) && !topic %in% exported_topics) {
+    aliases <- character()
+    if (!is.null(rd_parsed)) {
+      # rd_parsed is a list of Rd objects; each element has a tag name as
+      # the attribute 'Rd_tag'. We find elements where the tag is '\alias'
+      for (node in rd_parsed) {
+        tag <- attr(node, "Rd_tag")
+        if (!is.null(tag) && tag == "\\alias") {
+          aliases <- c(aliases, paste(unlist(node), collapse = ""))
+        }
+      }
+    }
+
+    # Fallback to file basename if we couldn't parse aliases
+    if (length(aliases) == 0) {
+      aliases <- tools::file_path_sans_ext(basename(rd_file))
+    }
+
+    # Skip if none of the aliases are exported (and we have a NAMESPACE file)
+    if (!is.null(exported_topics) && !any(aliases %in% exported_topics)) {
       next
     }
 
-    build_reference_topic(pkg, topic, rd_file, lazy = lazy)
+    build_reference_topic(
+      pkg,
+      rd_file = rd_file,
+      aliases = aliases,
+      lazy = lazy
+    )
   }
 
   if (preview) {
@@ -72,19 +101,9 @@ build_reference <- function(
   invisible(TRUE)
 }
 
-build_reference_topic <- function(pkg, topic, rd_file, lazy = FALSE) {
-  dst_path <- file.path("reference", paste0(topic, ".html"))
-
-  if (lazy && file.exists(file.path(pkg$dst_path, dst_path))) {
-    if (
-      file.info(rd_file)$mtime <=
-        file.info(file.path(pkg$dst_path, dst_path))$mtime
-    ) {
-      return(invisible())
-    }
-  }
-
-  message("Writing ", dst_path)
+build_reference_topic <- function(pkg, rd_file, aliases = NULL, lazy = FALSE) {
+  # Render the Rd to a single HTML fragment, then write one file per alias
+  message("Writing reference pages for Rd: ", basename(rd_file))
 
   # Use tools::Rd2HTML to convert Rd file to HTML
   temp_html <- tempfile(fileext = ".html")
@@ -114,46 +133,56 @@ build_reference_topic <- function(pkg, topic, rd_file, lazy = FALSE) {
   }
 
   # Clean up HTML: Remove <p> tags inside table cells for better alignment
-  # This prevents vertical misalignment in argument tables
   html_content <- gsub("<td>\n<p>", "<td>\n", html_content, fixed = TRUE)
   html_content <- gsub("<td><p>", "<td>", html_content, fixed = TRUE)
   html_content <- gsub("</p>\n</td>", "\n</td>", html_content, fixed = TRUE)
   html_content <- gsub("</p></td>", "</td>", html_content, fixed = TRUE)
 
   # Remove the R documentation footer that includes package version
-  # Split by lines to find and remove the exact line
   lines <- strsplit(html_content, "\n")[[1]]
-
-  # Find lines containing the package footer pattern
   footer_pattern <- "\\[Package.*version.*\\]"
   lines_to_keep <- c()
-
   for (i in seq_along(lines)) {
-    # Check if this line has the package footer
     if (grepl(footer_pattern, lines[i])) {
-      # Skip this line and check if previous line was <hr>
       if (
         length(lines_to_keep) > 0 &&
           grepl("^<hr>\\s*$", lines_to_keep[length(lines_to_keep)])
       ) {
-        # Remove the <hr> too
         lines_to_keep <- lines_to_keep[-length(lines_to_keep)]
       }
       next
     }
     lines_to_keep <- c(lines_to_keep, lines[i])
   }
-
   html_content <- paste(lines_to_keep, collapse = "\n")
 
   # Clean up temporary file
   unlink(temp_html)
 
-  data <- list(
-    pagetitle = topic,
-    contents = html_content
-  )
+  # Ensure we have aliases to write; fallback to basename if needed
+  if (is.null(aliases) || length(aliases) == 0) {
+    aliases <- tools::file_path_sans_ext(basename(rd_file))
+  }
 
-  render_page(pkg, "reference-topic", data, dst_path)
+  for (alias in aliases) {
+    dst_path <- file.path("reference", paste0(alias, ".html"))
+
+    if (lazy && file.exists(file.path(pkg$dst_path, dst_path))) {
+      if (
+        file.info(rd_file)$mtime <=
+          file.info(file.path(pkg$dst_path, dst_path))$mtime
+      ) {
+        next
+      }
+    }
+
+    data <- list(
+      pagetitle = alias,
+      contents = html_content
+    )
+
+    render_page(pkg, "reference-topic", data, dst_path)
+  }
+
   invisible()
 }
